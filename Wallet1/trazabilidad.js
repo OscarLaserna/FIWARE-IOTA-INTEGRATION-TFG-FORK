@@ -45,12 +45,14 @@ require('dotenv').config();
 function utf8ToHex(str) {
     return '0x' + Buffer.from(str, 'utf8').toString('hex');
 }
-// Función para convertir hexadecimal a UTF-8
+// Función para convertir de hexadecimal a UTF-8
 function hexToUtf8(hex) {
-    return Buffer.from(hex.replace(/^0x/, ''), 'hex').toString('utf8');
+    return Buffer.from(hex.substring(2), 'hex').toString('utf-8');
 }
+// Variables globales
 var walletInstance = null;
 var acState = false; // Estado del aire acondicionado (ON/OFF)
+var blockIds = []; // Array para almacenar los block IDs
 // Inicializar la wallet una sola vez
 function initializeWallet() {
     return __awaiter(this, void 0, void 0, function () {
@@ -74,10 +76,10 @@ function initializeWallet() {
         });
     });
 }
-// Envía datos a IOTA
+// Envía datos a la red IOTA
 function sendToIota(payload) {
     return __awaiter(this, void 0, void 0, function () {
-        var wallet, account, address, tag, taggedDataPayload, response;
+        var wallet, account, address, taggedDataPayload, response;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0: return [4 /*yield*/, initializeWallet()];
@@ -90,102 +92,48 @@ function sendToIota(payload) {
                 case 3:
                     _a.sent();
                     address = 'rms1qpun0fuekhvjvyhesrnehuvuxq6p2rlwapflg073vtx450ntderdjqjr74w';
-                    tag = '/ul/iot1234/device001/attrs';
                     taggedDataPayload = {
                         type: sdk_1.PayloadType.TaggedData,
-                        tag: utf8ToHex(tag),
+                        tag: utf8ToHex('/ul/iot1234/device001/attrs'),
                         data: utf8ToHex(payload),
                         getType: function () { return sdk_1.PayloadType.TaggedData; }
                     };
                     return [4 /*yield*/, account.send(BigInt(50600), address, { taggedDataPayload: taggedDataPayload })];
                 case 4:
                     response = _a.sent();
-                    console.log("Block sent: ".concat(process.env.EXPLORER_URL, "/block/").concat(response.blockId));
+                    console.log("Bloque enviado: ".concat(process.env.EXPLORER_URL, "/block/").concat(response.blockId));
+                    if (response.blockId) {
+                        blockIds.push(response.blockId);
+                    }
+                    else {
+                        console.error('El Block ID es indefinido.');
+                    }
                     return [2 /*return*/];
             }
         });
     });
 }
-// Recupera la trazabilidad desde IOTA para un camión específico
-function getTruckTrace(truckId) {
-    var _a;
+// Simula el movimiento del camión
+function simulateTruck(routeFile) {
     return __awaiter(this, void 0, void 0, function () {
-        var client, blockIds, dataFound, _i, blockIds_1, blockId, block, payload, payloadUtf8, error_1;
-        return __generator(this, function (_b) {
-            switch (_b.label) {
-                case 0:
-                    client = new sdk_1.Client({ nodes: [process.env.NODE_URL] });
-                    console.log("Fetching data for truck ID: ".concat(truckId));
-                    _b.label = 1;
-                case 1:
-                    _b.trys.push([1, 6, , 7]);
-                    blockIds = [ /* Lista de blockIds obtenidos anteriormente */];
-                    if (blockIds.length === 0) {
-                        console.error('No block IDs available to fetch data');
-                        return [2 /*return*/];
-                    }
-                    console.log("Found ".concat(blockIds.length, " block(s) to check"));
-                    dataFound = false;
-                    _i = 0, blockIds_1 = blockIds;
-                    _b.label = 2;
-                case 2:
-                    if (!(_i < blockIds_1.length)) return [3 /*break*/, 5];
-                    blockId = blockIds_1[_i];
-                    console.log("Checking block ID: ".concat(blockId));
-                    return [4 /*yield*/, client.getBlock(blockId)];
-                case 3:
-                    block = _b.sent();
-                    // Verifica que el bloque contenga la propiedad payload
-                    if (((_a = block === null || block === void 0 ? void 0 : block.payload) === null || _a === void 0 ? void 0 : _a.type) === sdk_1.PayloadType.TaggedData) {
-                        payload = block.payload;
-                        if (payload.data) {
-                            payloadUtf8 = hexToUtf8(payload.data);
-                            // Filtrar por ID del camión
-                            if (payloadUtf8.includes("id|".concat(truckId, "|"))) {
-                                console.log("Data for truck ".concat(truckId, ": ").concat(payloadUtf8));
-                                dataFound = true;
-                            }
-                        }
-                    }
-                    _b.label = 4;
-                case 4:
-                    _i++;
-                    return [3 /*break*/, 2];
-                case 5:
-                    if (!dataFound) {
-                        console.log("No data found for truck ID: ".concat(truckId));
-                    }
-                    return [3 /*break*/, 7];
-                case 6:
-                    error_1 = _b.sent();
-                    console.error('Error fetching data from Tangle:', error_1);
-                    return [3 /*break*/, 7];
-                case 7: return [2 /*return*/];
-            }
-        });
-    });
-}
-// Simula el camión
-function simulateTruck(truckId, routeFile) {
-    return __awaiter(this, void 0, void 0, function () {
-        var route, temperature, i, point, payload, error_2;
+        var route, temperature, _i, route_1, point, payload, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     route = loadRoute(routeFile);
                     temperature = 20.0;
-                    i = 0;
+                    _i = 0, route_1 = route;
                     _a.label = 1;
                 case 1:
-                    if (!(i < route.length)) return [3 /*break*/, 8];
-                    point = route[i];
+                    if (!(_i < route_1.length)) return [3 /*break*/, 8];
+                    point = route_1[_i];
                     // Verifica que las coordenadas existan
                     if (!point || point.length < 2) {
-                        console.error('Invalid GPS point:', point);
+                        console.error('Punto GPS inválido:', point);
                         return [3 /*break*/, 7];
                     }
-                    payload = "id|".concat(truckId, "|t|").concat(temperature.toFixed(1), "|ac|").concat(acState ? 'on' : 'off', "|gps|").concat(point[1], ",").concat(point[0]);
-                    console.log("Sending data: ".concat(payload));
+                    payload = "t|".concat(temperature.toFixed(1), "|ac|").concat(acState ? 'on' : 'off', "|gps|").concat(point[1], ",").concat(point[0]);
+                    console.log("Enviando datos: ".concat(payload));
                     _a.label = 2;
                 case 2:
                     _a.trys.push([2, 4, , 5]);
@@ -194,17 +142,12 @@ function simulateTruck(truckId, routeFile) {
                     _a.sent();
                     return [3 /*break*/, 5];
                 case 4:
-                    error_2 = _a.sent();
-                    console.error('Error sending to IOTA:', error_2);
-                    return [3 /*break*/, 8]; // Detén el ciclo si hay un error
+                    error_1 = _a.sent();
+                    console.error('Error al enviar datos a IOTA:', error_1);
+                    return [3 /*break*/, 8];
                 case 5:
                     // Actualizar la temperatura
-                    if (acState) {
-                        temperature -= Math.random() * 0.5; // Si el aire está encendido, baja la temperatura
-                    }
-                    else {
-                        temperature += Math.random() * 0.5; // Si el aire está apagado, sube la temperatura
-                    }
+                    temperature += acState ? -(Math.random() * 0.5) : Math.random() * 0.5;
                     temperature = Math.max(15, Math.min(temperature, 30));
                     // Esperar 1 segundo antes de enviar el siguiente punto
                     return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 1000); })];
@@ -213,19 +156,20 @@ function simulateTruck(truckId, routeFile) {
                     _a.sent();
                     _a.label = 7;
                 case 7:
-                    i++;
+                    _i++;
                     return [3 /*break*/, 1];
-                case 8:
-                    console.log("Route completed for truck ID: ".concat(truckId, ". Fetching traceability data..."));
-                    return [4 /*yield*/, getTruckTrace(truckId)];
+                case 8: 
+                // Consultar los bloques enviados
+                return [4 /*yield*/, queryBlocks()];
                 case 9:
-                    _a.sent(); // Recuperar trazabilidad al final
+                    // Consultar los bloques enviados
+                    _a.sent();
                     return [2 /*return*/];
             }
         });
     });
 }
-// Lee la ruta desde un archivo JSON
+// Carga la ruta desde un archivo JSON
 function loadRoute(routeFile) {
     var filePath = path.resolve(routeFile);
     try {
@@ -233,39 +177,92 @@ function loadRoute(routeFile) {
         return JSON.parse(data);
     }
     catch (error) {
-        console.error('Error loading route file:', error);
+        console.error('Error al cargar el archivo de ruta:', error);
         return [];
     }
 }
-// Configura el sistema de entrada para cambiar el estado del AC
+// Configura el sistema de entrada para cambiar el estado del aire acondicionado
 function setupUserInput() {
     var rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
     });
-    console.log('Commands: ON (turn AC on), OFF (turn AC off), EXIT (stop simulation)');
+    console.log('Comandos: ON (enciende AC), OFF (apaga AC), EXIT (detener simulación)');
     rl.on('line', function (input) {
         var command = input.trim().toUpperCase();
         if (command === 'ON') {
             acState = true;
-            console.log('AC turned ON');
+            console.log('Aire acondicionado encendido.');
         }
         else if (command === 'OFF') {
             acState = false;
-            console.log('AC turned OFF');
+            console.log('Aire acondicionado apagado.');
         }
         else if (command === 'EXIT') {
-            console.log('Exiting simulation...');
+            console.log('Saliendo de la simulación...');
             rl.close();
             process.exit(0);
         }
         else {
-            console.log('Invalid command. Use ON, OFF, or EXIT.');
+            console.log('Comando inválido. Usa ON, OFF o EXIT.');
         }
+    });
+}
+// Consulta y decodifica los datos de los bloques enviados
+// Consulta y decodifica los datos de los bloques enviados
+function queryBlocks() {
+    return __awaiter(this, void 0, void 0, function () {
+        var wallet, client, _i, blockIds_1, blockId, block, transactionPayload, essence, essencePayload, taggedDataPayload, dataHex, decodedData, error_2;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, initializeWallet()];
+                case 1:
+                    wallet = _a.sent();
+                    return [4 /*yield*/, wallet.getClient()];
+                case 2:
+                    client = _a.sent();
+                    _i = 0, blockIds_1 = blockIds;
+                    _a.label = 3;
+                case 3:
+                    if (!(_i < blockIds_1.length)) return [3 /*break*/, 8];
+                    blockId = blockIds_1[_i];
+                    _a.label = 4;
+                case 4:
+                    _a.trys.push([4, 6, , 7]);
+                    return [4 /*yield*/, client.getBlock(blockId)];
+                case 5:
+                    block = _a.sent();
+                    //console.log(`Detalles del bloque ${blockId}:`, JSON.stringify(block, null, 2));
+                    // Verificar si el bloque tiene un payload de tipo 'Transaction'
+                    if (block.payload && block.payload.type === sdk_1.PayloadType.Transaction) {
+                        transactionPayload = block.payload;
+                        essence = transactionPayload.essence;
+                        essencePayload = essence.payload;
+                        // Verificar si el essencePayload es del tipo TaggedData
+                        if (essencePayload && essencePayload.type === sdk_1.PayloadType.TaggedData) {
+                            taggedDataPayload = essencePayload;
+                            dataHex = taggedDataPayload.data;
+                            decodedData = hexToUtf8(dataHex);
+                            console.log("Datos decodificados del bloque ".concat(blockId, ": \n"), decodedData, "\n");
+                        }
+                        else {
+                            console.log('El payload no es TaggedData.');
+                        }
+                    }
+                    return [3 /*break*/, 7];
+                case 6:
+                    error_2 = _a.sent();
+                    console.error("Error al recuperar el bloque ".concat(blockId, ":"), error_2);
+                    return [3 /*break*/, 7];
+                case 7:
+                    _i++;
+                    return [3 /*break*/, 3];
+                case 8: return [2 /*return*/];
+            }
+        });
     });
 }
 // Ejecuta la simulación
 var routeFile = './vehicle001-route.json';
-var truckId = 'truck001'; // ID del camión
 setupUserInput();
-simulateTruck(truckId, routeFile)["catch"](function (err) { return console.error('Error:', err); });
+simulateTruck(routeFile)["catch"](function (err) { return console.error('Error en la simulación:', err); });

@@ -1,4 +1,4 @@
-import { Wallet, CoinType, TaggedDataPayload, PayloadType } from '@iota/sdk';
+import { Wallet, CoinType, TaggedDataPayload, PayloadType, TransactionPayload, Block, TransactionEssence  } from '@iota/sdk';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
@@ -9,6 +9,12 @@ function utf8ToHex(str: string): string {
     return '0x' + Buffer.from(str, 'utf8').toString('hex');
 }
 
+// Función para convertir de hexadecimal a UTF-8
+function hexToUtf8(hex: string): string {
+    return Buffer.from(hex.substring(2), 'hex').toString('utf-8');
+}
+
+// Variables globales
 let walletInstance: Wallet | null = null;
 let acState = false; // Estado del aire acondicionado (ON/OFF)
 let blockIds: string[] = []; // Array para almacenar los block IDs
@@ -33,7 +39,7 @@ async function initializeWallet(): Promise<Wallet> {
     return walletInstance;
 }
 
-// Envía datos a IOTA
+// Envía datos a la red IOTA
 async function sendToIota(payload: string) {
     const wallet = await initializeWallet();
     const account = await wallet.getAccount(process.env.ACCOUNT_NAME!);
@@ -48,58 +54,50 @@ async function sendToIota(payload: string) {
     };
 
     const response = await account.send(BigInt(50600), address, { taggedDataPayload });
-    console.log(`Block sent: ${process.env.EXPLORER_URL}/block/${response.blockId}`);
-
-    // Verifica si response.blockId está definido antes de agregarlo al array
+    console.log(`Bloque enviado: ${process.env.EXPLORER_URL}/block/${response.blockId}`);
     if (response.blockId) {
         blockIds.push(response.blockId);
     } else {
-        console.error('Block ID is undefined');
+        console.error('El Block ID es indefinido.');
     }
 }
 
-// Simula el camión
+// Simula el movimiento del camión
 async function simulateTruck(routeFile: string) {
     const route = loadRoute(routeFile);
     let temperature = 20.0;
 
-    for (let i = 0; i < route.length; i++) {
-        const point = route[i];
-
+    for (const point of route) {
         // Verifica que las coordenadas existan
         if (!point || point.length < 2) {
-            console.error('Invalid GPS point:', point);
+            console.error('Punto GPS inválido:', point);
             continue;
         }
 
         // Crear el payload con coordenadas
         const payload = `t|${temperature.toFixed(1)}|ac|${acState ? 'on' : 'off'}|gps|${point[1]},${point[0]}`;
-        console.log(`Sending data: ${payload}`);
+        console.log(`Enviando datos: ${payload}`);
 
         try {
             await sendToIota(payload);
         } catch (error) {
-            console.error('Error sending to IOTA:', error);
-            break; // Detén el ciclo si hay un error
+            console.error('Error al enviar datos a IOTA:', error);
+            break;
         }
 
         // Actualizar la temperatura
-        if (acState) {
-            temperature -= Math.random() * 0.5; // Si el aire está encendido, baja la temperatura
-        } else {
-            temperature += Math.random() * 0.5; // Si el aire está apagado, sube la temperatura
-        }
+        temperature += acState ? -(Math.random() * 0.5) : Math.random() * 0.5;
         temperature = Math.max(15, Math.min(temperature, 30));
 
         // Esperar 1 segundo antes de enviar el siguiente punto
-        //await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
-    // Una vez que la simulación ha terminado, consulta los bloques
+    // Consultar los bloques enviados
     await queryBlocks();
 }
 
-// Lee la ruta desde un archivo JSON
+// Carga la ruta desde un archivo JSON
 function loadRoute(routeFile: string): number[][] {
     const filePath = path.resolve(routeFile);
 
@@ -107,50 +105,75 @@ function loadRoute(routeFile: string): number[][] {
         const data = fs.readFileSync(filePath, 'utf-8');
         return JSON.parse(data);
     } catch (error) {
-        console.error('Error loading route file:', error);
+        console.error('Error al cargar el archivo de ruta:', error);
         return [];
     }
 }
 
-// Configura el sistema de entrada para cambiar el estado del AC
+// Configura el sistema de entrada para cambiar el estado del aire acondicionado
 function setupUserInput() {
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,
     });
 
-    console.log('Commands: ON (turn AC on), OFF (turn AC off), EXIT (stop simulation)');
+    console.log('Comandos: ON (enciende AC), OFF (apaga AC), EXIT (detener simulación)');
     rl.on('line', (input) => {
         const command = input.trim().toUpperCase();
         if (command === 'ON') {
             acState = true;
-            console.log('AC turned ON');
+            console.log('Aire acondicionado encendido.');
         } else if (command === 'OFF') {
             acState = false;
-            console.log('AC turned OFF');
+            console.log('Aire acondicionado apagado.');
         } else if (command === 'EXIT') {
-            console.log('Exiting simulation...');
+            console.log('Saliendo de la simulación...');
             rl.close();
             process.exit(0);
         } else {
-            console.log('Invalid command. Use ON, OFF, or EXIT.');
+            console.log('Comando inválido. Usa ON, OFF o EXIT.');
         }
     });
 }
 
-// Consulta los bloques enviados
+// Consulta y decodifica los datos de los bloques enviados
+// Consulta y decodifica los datos de los bloques enviados
 async function queryBlocks() {
     const wallet = await initializeWallet();
-    const client = wallet.getClient(); // El cliente ahora es un 'Client' que se obtiene de 'getClient'
+    const client = await wallet.getClient();
 
     for (const blockId of blockIds) {
         try {
-            // Intentamos obtener los datos del bloque, en lugar de 'getBlock', usa 'getBlockMetadata' o similar
-            const blockMetadata = await client.getBlockMetadata(blockId); 
-            console.log(`Block ID: ${blockId}`);
-            console.log(`Block Data: ${JSON.stringify(blockMetadata)}`);
+            const block: Block = await client.getBlock(blockId);
+            //console.log(`Detalles del bloque ${blockId}:`, JSON.stringify(block, null, 2));
+
+            // Verificar si el bloque tiene un payload de tipo 'Transaction'
+            if (block.payload && block.payload.type === PayloadType.Transaction) {
+                const transactionPayload = block.payload as TransactionPayload;
+
+                // Mostrar toda la estructura de la transacción para ver cómo acceder a los datos
+                //console.log('Estructura completa de la transacción:', JSON.stringify(transactionPayload, null, 2));
+
+                // Acceder a 'essence' y verificar si contiene lo que necesitamos
+                const essence = transactionPayload.essence;
+
+                // Usar un type assertion para permitir el acceso a 'payload' en 'essence'
+                const essencePayload = (essence as any).payload; // Aseguramos que 'essence' tenga 'payload'
+
+                // Verificar si el essencePayload es del tipo TaggedData
+                if (essencePayload && essencePayload.type === PayloadType.TaggedData) {
+                    const taggedDataPayload = essencePayload as TaggedDataPayload;
+
+                    // Decodificar el 'data' (hexadecimal a UTF-8)
+                    const dataHex = taggedDataPayload.data;
+                    const decodedData = hexToUtf8(dataHex);
+                    console.log(`Datos decodificados del bloque ${blockId}: \n`, decodedData,`\n`);
+                } else {
+                    console.log('El payload no es TaggedData.');
+                }
+            }
         } catch (error) {
-            console.error(`Error retrieving block ${blockId}:`, error);
+            console.error(`Error al recuperar el bloque ${blockId}:`, error);
         }
     }
 }
@@ -159,4 +182,4 @@ async function queryBlocks() {
 // Ejecuta la simulación
 const routeFile = './vehicle001-route.json';
 setupUserInput();
-simulateTruck(routeFile).catch(err => console.error('Error:', err));
+simulateTruck(routeFile).catch(err => console.error('Error en la simulación:', err));
