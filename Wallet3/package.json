@@ -1,0 +1,30 @@
+{
+  "name": "fiware-iota-integration-tfg-fork",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OscarLaserna/FIWARE-IOTA-INTEGRATION-TFG-FORK.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OscarLaserna/FIWARE-IOTA-INTEGRATION-TFG-FORK/issues"
+  },
+  "homepage": "https://github.com/OscarLaserna/FIWARE-IOTA-INTEGRATION-TFG-FORK#readme",
+  "dependencies": {
+    "@iota/sdk": "^1.1.5",
+    "@iota/wallet": "^2.0.3-rc.47",
+    "@types/mongodb": "^4.0.7",
+    "@types/mqtt": "^2.5.0",
+    "axios": "^1.7.7",
+    "bip39": "^3.1.0",
+    "dotenv": "^16.4.5",
+    "typescript": "^5.6.3"
+  }
+}

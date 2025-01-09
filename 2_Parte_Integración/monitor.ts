@@ -29,6 +29,9 @@ function utf8ToHex(str: string): string {
 const mqttClient = mqtt.connect('mqtt://localhost:1883'); // Conecta a Mosquitto 
 
 // Configuración de MongoDB
+// if (!process.env.MONGODB_URI) {
+//     throw new Error("La variable de entorno MONGODB_URI no está definida.");
+// }
 const mongoClient = new MongoClient(process.env.MONGODB_URI); 
 const dbName = process.env.MONGODB_DB_NAME; 
 
