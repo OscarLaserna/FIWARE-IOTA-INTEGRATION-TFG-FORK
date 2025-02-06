@@ -86,6 +86,7 @@ async function simulateTruck(routeFile: string) {
         // Esperar 1 segundo antes de enviar el siguiente punto
         //await new Promise(resolve => setTimeout(resolve, 1000));
     }
+    process.exit(0);
 }
 
 // Lee la ruta desde un archivo JSON

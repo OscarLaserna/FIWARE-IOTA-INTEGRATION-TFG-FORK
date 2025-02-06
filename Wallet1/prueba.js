@@ -146,7 +146,9 @@ function simulateTruck(routeFile) {
                 case 6:
                     i++;
                     return [3 /*break*/, 1];
-                case 7: return [2 /*return*/];
+                case 7:
+                    process.exit(0);
+                    return [2 /*return*/];
             }
         });
     });

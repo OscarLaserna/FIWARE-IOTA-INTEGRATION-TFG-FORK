@@ -1,6 +1,6 @@
 // Importar las bibliotecas necesarias
 import { Wallet, initLogger, CoinType } from '@iota/sdk';
-require('dotenv').config({ path: '.env' });
+require('dotenv').config({ path: '.env3' });
 
 // Función asincrónica principal
 async function run() {
@@ -13,7 +13,7 @@ async function run() {
             'EXPLORER_URL',
         ]) {
             if (!(envVar in process.env)) {
-                throw new Error(`.env ${envVar} is not defined`);
+                throw new Error(`.env3 ${envVar} is not defined`);
             }
         }
 
@@ -26,14 +26,14 @@ async function run() {
             coinType: CoinType.Shimmer, 
             secretManager: {
                 stronghold: {
-                    snapshotPath: './v3.stronghold',
+                    snapshotPath: './wallet.stronghold3',
                     password: process.env.SH_PASSWORD as string, 
                 },
             },
         });
 
         // Obtiene la cuenta
-        const account = await wallet.getAccount('Wallet1');
+        const account = await wallet.getAccount('Wallet3');
 
         // Sincroniza la cuenta con la red
         await account.sync();
@@ -43,7 +43,7 @@ async function run() {
 
         // Define la dirección de destino y la cantidad a enviar
         const address =
-            'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0';
+            'rms1qr69y65kxmcxy0dxjh6f8at8vqc270g37a9ku5ewkk72q5gwgt83x3lwj8j';
         const amount = BigInt(1000000); // Cantidad a enviar en la transacción
 
         // Envía la cantidad especificada a la dirección de destino

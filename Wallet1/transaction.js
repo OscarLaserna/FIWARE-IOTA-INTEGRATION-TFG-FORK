@@ -38,7 +38,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 exports.__esModule = true;
 // Importar las bibliotecas necesarias
 var sdk_1 = require("@iota/sdk");
-require('dotenv').config({ path: '.env' });
+require('dotenv').config({ path: '.env3' });
 // Función asincrónica principal
 function run() {
     return __awaiter(this, void 0, void 0, function () {
@@ -58,7 +58,7 @@ function run() {
                     ]; _i < _a.length; _i++) {
                         envVar = _a[_i];
                         if (!(envVar in process.env)) {
-                            throw new Error(".env ".concat(envVar, " is not defined"));
+                            throw new Error(".env3 ".concat(envVar, " is not defined"));
                         }
                     }
                     wallet = new sdk_1.Wallet({
@@ -69,13 +69,12 @@ function run() {
                         coinType: sdk_1.CoinType.Shimmer,
                         secretManager: {
                             stronghold: {
-                                //snapshotPath: './v3.stronghold',
-                                snapshotPath: './wallet.stronghold',
+                                snapshotPath: './wallet.stronghold3',
                                 password: process.env.SH_PASSWORD
                             }
                         }
                     });
-                    return [4 /*yield*/, wallet.getAccount('Wallet1')];
+                    return [4 /*yield*/, wallet.getAccount('Wallet3')];
                 case 2:
                     account = _b.sent();
                     // Sincroniza la cuenta con la red
@@ -86,7 +85,7 @@ function run() {
                     return [4 /*yield*/, wallet.setStrongholdPassword(process.env.SH_PASSWORD)];
                 case 4:
                     _b.sent();
-                    address = 'rms1qrrv7flg6lz5cssvzv2lsdt8c673khad060l4quev6q09tkm9mgtupgf0h0';
+                    address = 'rms1qr69y65kxmcxy0dxjh6f8at8vqc270g37a9ku5ewkk72q5gwgt83x3lwj8j';
                     amount = BigInt(1000000);
                     return [4 /*yield*/, account.send(amount, address)];
                 case 5:

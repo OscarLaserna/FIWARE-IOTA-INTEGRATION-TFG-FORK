@@ -6,7 +6,7 @@ import * as path from 'path';
 // Función para actualizar el archivo .env con una nueva clave-valor
 function updateEnvFile(key: string, value: string) {
     // Obtiene la ruta absoluta del archivo .env
-    const envPath = path.resolve('.env');
+    const envPath = path.resolve('2.env');
     // Lee el contenido del archivo .env
     const envFileContent = fs.readFileSync(envPath, 'utf-8');
     // Actualiza la línea que comienza con la clave especificada

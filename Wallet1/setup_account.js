@@ -38,7 +38,7 @@ var _a = require('@iota/wallet'), AccountManager = _a.AccountManager, CoinType =
 var networkConfig = require('./networkConfig.js');
 var nodeURL = networkConfig.node;
 // Carga las variables de entorno desde un archivo .env
-require('dotenv').config();
+require('dotenv').config({ path: '2.env' });
 var password = process.env.SH_PASSWORD;
 var mnemonic = process.env.MNEMONIC;
 var accountName = process.env.ACCOUNT_NAME;
@@ -59,7 +59,7 @@ function run() {
                         coinType: CoinType.Shimmer,
                         secretManager: {
                             Stronghold: {
-                                snapshotPath: "./wallet.stronghold",
+                                snapshotPath: "./wallet2.stronghold",
                                 password: "".concat(password)
                             }
                         }

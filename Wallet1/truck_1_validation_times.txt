@@ -1,0 +1,10 @@
+Block ID: 0xfa75efdcba661c0264dc80cbb86efc7a4816749e53ebf4be505d394221c5ea09 | Validation Time: 8.13 seconds
+Block ID: 0x7a6449c931f2b4ab98abfe0df69c33d3bd774321e72c74340f573197dc70d4e2 | Validation Time: 14.07 seconds
+Block ID: 0x2f8ea7451a03c7d223b4697b0cbe4f25b36ce4a724b03ca45e38eb67dc0f7a27 | Validation Time: 5.12 seconds
+Block ID: 0x40a5a756fd14aa73e83f973c1120b3714d5112b5041386e5bc420cf4ed6d8ff8 | Validation Time: 5.46 seconds
+Block ID: 0xcfaff1fd4c52eff11b52fab4f91f5bc406cd3b7f43658025e17b233dbd2f1970 | Validation Time: 3.38 seconds
+Block ID: 0x05b9fbfa9359c08b76467dba1ddc96d31611783a40652caf510a28027e27b568 | Validation Time: 5.40 seconds
+Block ID: 0x7c59e9eca3d013c03b06a190136a448a18b7a09e9df32612d8c3f3a63f18ad8c | Validation Time: 9.16 seconds
+Block ID: 0xec5eaccdc433b2de07411cbac083c3f2fbf262b847c564fe57fafd3b7c6439a7 | Validation Time: 9.03 seconds
+Block ID: 0xe2c146d50c2b5d6119ed76edd0669b390f046992aa4be5bd7824a9d44b07bc70 | Validation Time: 9.24 seconds
+Block ID: 0x5d7a1f5cd7f5ecb4fea8475fe33c1b650c487613ebeda6cbdc3f6658ec58f39e | Validation Time: 4.06 seconds

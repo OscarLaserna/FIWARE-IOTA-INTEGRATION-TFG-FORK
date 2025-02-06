@@ -43,7 +43,7 @@ var path = require("path");
 // Función para actualizar el archivo .env con una nueva clave-valor
 function updateEnvFile(key, value) {
     // Obtiene la ruta absoluta del archivo .env
-    var envPath = path.resolve('.env');
+    var envPath = path.resolve('2.env');
     // Lee el contenido del archivo .env
     var envFileContent = fs.readFileSync(envPath, 'utf-8');
     // Actualiza la línea que comienza con la clave especificada

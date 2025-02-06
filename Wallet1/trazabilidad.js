@@ -164,6 +164,7 @@ function simulateTruck(routeFile) {
                 case 9:
                     // Consultar los bloques enviados
                     _a.sent();
+                    process.exit(0);
                     return [2 /*return*/];
             }
         });

@@ -6,8 +6,9 @@ const networkConfig = require('./networkConfig.js');
 const faucetApi = networkConfig.faucetApi;
 
 // Define la dirección de recepción en formato Bech32
-//const receivingAddress = 'rms1qr69y65kxmcxy0dxjh6f8at8vqc270g37a9ku5ewkk72q5gwgt83x3lwj8j';
-const receivingAddress = 'rms1qpun0fuekhvjvyhesrnehuvuxq6p2rlwapflg073vtx450ntderdjqjr74w';
+const receivingAddress = 'rms1qqphz3plmrx8p86kfvq00cs3rcn5p78edjh90hue0tcsae854esrjghl5nz';
+//const receivingAddress = 'rms1qpun0fuekhvjvyhesrnehuvuxq6p2rlwapflg073vtx450ntderdjqjr74w';
+//const receivingAddress = 'rms1qqedg4l5g6sxr5k6zs96k6vm66arpgnl0zzx0e9n7j9frtwtmmwzsev0nw4';
 // Función asincrónica principal
 async function run() {
   // Llama a la función para solicitar fondos desde el faucet y espera su resultado

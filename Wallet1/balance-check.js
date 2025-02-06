@@ -39,7 +39,7 @@ exports.__esModule = true;
 // Importar las bibliotecas necesarias
 var sdk_1 = require("@iota/sdk");
 // Carga las variables de entorno desde un archivo .env
-require('dotenv').config({ path: '.env' });
+require('dotenv').config({ path: '3.env' });
 var accountName = process.env.ACCOUNT_NAME;
 // Función asincrónica principal
 function run() {
@@ -63,7 +63,7 @@ function run() {
                     wallet = new sdk_1.Wallet({
                         storagePath: process.env.WALLET_DB_PATH
                     });
-                    return [4 /*yield*/, wallet.getAccount('Wallet1')];
+                    return [4 /*yield*/, wallet.getAccount('Wallet3')];
                 case 2:
                     account = _b.sent();
                     return [4 /*yield*/, account.sync()];

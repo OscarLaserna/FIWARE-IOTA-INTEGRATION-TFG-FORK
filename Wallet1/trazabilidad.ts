@@ -95,6 +95,8 @@ async function simulateTruck(routeFile: string) {
 
     // Consultar los bloques enviados
     await queryBlocks();
+    process.exit(0);
+    return;
 }
 
 // Carga la ruta desde un archivo JSON

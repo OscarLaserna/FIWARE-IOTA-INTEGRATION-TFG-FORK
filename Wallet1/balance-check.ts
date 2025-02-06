@@ -1,7 +1,7 @@
 // Importar las bibliotecas necesarias
 import { Wallet, initLogger } from '@iota/sdk';
 // Carga las variables de entorno desde un archivo .env
-require('dotenv').config({ path: '.env' });
+require('dotenv').config({ path: '3.env' });
 const accountName = process.env.ACCOUNT_NAME;
 
 // Función asincrónica principal
@@ -21,7 +21,7 @@ async function run() {
         });
 
         // Obtiene la cuenta llamada 'Wallet1' desde la billetera
-        const account = await wallet.getAccount('Wallet1');
+        const account = await wallet.getAccount('Wallet3');
         // Sincroniza el balance de la cuenta
         const _syncBalance = await account.sync();
 
