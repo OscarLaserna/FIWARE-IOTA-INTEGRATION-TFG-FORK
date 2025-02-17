@@ -35,57 +35,54 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a;
 exports.__esModule = true;
-// Importar las bibliotecas necesarias
 var sdk_1 = require("@iota/sdk");
 var fs = require("fs");
 var path = require("path");
-// Obtener el número de wallet desde el nombre del archivo .env
-var walletNumber = (_a = path.basename(__filename).match(/\d+/)) === null || _a === void 0 ? void 0 : _a[0];
-if (!walletNumber) {
-    console.error("❌ Error: No se pudo determinar el número de wallet.");
-    process.exit(1);
-}
-// Construir la ruta al archivo .env correspondiente
-var envFilePath = path.resolve(__dirname, "".concat(walletNumber, ".env"));
-// Verificar si el archivo .env existe antes de cargarlo
-if (!fs.existsSync(envFilePath)) {
-    console.error("\u274C Error: El archivo ".concat(walletNumber, ".env no existe."));
-    process.exit(1);
-}
+// Número de wallets a modificar
+var NUM_WALLETS = 10; // Ajusta este número según las wallets que necesites
 // Función para actualizar el archivo .env con una nueva clave-valor
-function updateEnvFile(key, value) {
-    // Lee el contenido del archivo .env
-    var envFileContent = fs.readFileSync(envFilePath, 'utf-8');
-    // Si la clave ya existe, actualiza su valor; si no, agrégala al final
-    var newEnvFileContent = envFileContent.includes("".concat(key, "="))
-        ? envFileContent.split('\n').map(function (line) {
-            return line.startsWith(key) ? "".concat(key, "=").concat(value) : line;
-        }).join('\n')
-        : "".concat(envFileContent, "\n").concat(key, "=").concat(value);
-    // Escribe el contenido actualizado de nuevo en el archivo .env
-    fs.writeFileSync(envFilePath, newEnvFileContent, 'utf-8');
+function updateEnvFile(walletNumber, key, value) {
+    var envFileName = "".concat(walletNumber, ".env");
+    var envPath = path.resolve(__dirname, envFileName);
+    if (!fs.existsSync(envPath)) {
+        console.error("\u274C Archivo ".concat(envFileName, " no encontrado."));
+        return;
+    }
+    var envFileContent = fs.readFileSync(envPath, 'utf-8');
+    var updated = false;
+    var newEnvFileContent = envFileContent.split('\n').map(function (line) {
+        if (line.trim().startsWith("".concat(key, "="))) {
+            updated = true;
+            return "".concat(key, "='").concat(value, "'"); // Sustituye la línea existente con comillas
+        }
+        return line;
+    }).join('\n');
+    if (!updated) {
+        console.error("\u26A0\uFE0F No se encontr\u00F3 la clave ".concat(key, " en ").concat(envFileName, "."));
+        return;
+    }
+    fs.writeFileSync(envPath, newEnvFileContent, 'utf-8');
+    console.log("\u2705 Archivo ".concat(envFileName, " actualizado con ").concat(key, "."));
 }
-// Función asincrónica principal
-function run() {
+// Función principal para generar y actualizar mnemonics
+function generateMnemonics() {
     return __awaiter(this, void 0, void 0, function () {
-        var mnemonic;
+        var i, mnemonic;
         return __generator(this, function (_a) {
-            try {
-                mnemonic = sdk_1.Utils.generateMnemonic();
-                // Imprime la clave mnemotécnica en la consola
-                console.log("\uD83D\uDD11 Wallet".concat(walletNumber, " Mnemonic: ").concat(mnemonic));
-                // Actualiza el archivo .env de la wallet con la nueva clave mnemotécnica
-                updateEnvFile('MNEMONIC', mnemonic);
+            for (i = 4; i <= NUM_WALLETS; i++) {
+                try {
+                    mnemonic = sdk_1.Utils.generateMnemonic();
+                    console.log("Mnemonic para Wallet".concat(i, ": '").concat(mnemonic, "'")); // Mostrar con comillas
+                    updateEnvFile(i, 'MNEMONIC', mnemonic);
+                }
+                catch (error) {
+                    console.error("\u274C Error al generar mnemonic para Wallet".concat(i, ":"), error);
+                }
             }
-            catch (error) {
-                // Captura y muestra cualquier error que ocurra durante la ejecución
-                console.error('❌ Error: ', error);
-            }
+            console.log('🎉 Todos los archivos .env han sido actualizados con sus mnemonics.');
             return [2 /*return*/];
         });
     });
 }
-// Ejecutar el script
-run().then(function () { return process.exit(); });
+generateMnemonics().then(function () { return process.exit(); });

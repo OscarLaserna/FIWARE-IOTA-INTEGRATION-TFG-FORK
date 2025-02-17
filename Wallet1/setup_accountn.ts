@@ -1,78 +1,106 @@
-// const { AccountManager, CoinType } = require('@iota/wallet');
-// const path = require('path');
-// const fs = require('fs');
-// require('dotenv').config();
+const { AccountManager, CoinType } = require('@iota/wallet');
+const networkConfig = require('./networkConfig.js');
+const nodeURL = networkConfig.node;
+const fs = require('fs');
+const path = require('path');
 
-// // Obtener el número de wallet desde el nombre del archivo .env
-// const walletNumber = path.basename(__filename).match(/\d+/)?.[0];
+const NUM_WALLETS: number = 10;
 
-// if (!walletNumber) {
-//     console.error("❌ Error: No se pudo determinar el número de wallet.");
-//     process.exit(1);
-// }
+function deleteFolderRecursive(folderPath: string): void {
+    if (fs.existsSync(folderPath)) {
+        fs.readdirSync(folderPath).forEach((file: string) => {  // <-- Agregado ": string"
+            const curPath = path.join(folderPath, file);
+            if (fs.lstatSync(curPath).isDirectory()) {
+                deleteFolderRecursive(curPath);
+            } else {
+                fs.unlinkSync(curPath);
+            }
+        });
+        fs.rmdirSync(folderPath);
+        console.log(`🗑️ Base de datos eliminada: ${folderPath}`);
+    }
+}
 
-// // Construir la ruta al archivo .env correspondiente
-// const envFilePath = path.resolve(__dirname, `${walletNumber}.env`);
 
-// // Verificar si el archivo .env existe antes de cargarlo
-// if (!fs.existsSync(envFilePath)) {
-//     console.error(`❌ Error: El archivo ${walletNumber}.env no existe.`);
-//     process.exit(1);
-// }
+async function setupWallet(walletNumber: number): Promise<void> {
+    try {
+        const envFilePath: string = path.resolve(__dirname, `${walletNumber}.env`);
+        if (!fs.existsSync(envFilePath)) {
+            console.error(`❌ Archivo ${walletNumber}.env no encontrado.`);
+            return;
+        }
 
-// // Cargar el archivo .env de la wallet específica
-// require('dotenv').config({ path: envFilePath });
+        require('dotenv').config({ path: walletNumber !== 1 ? `./${walletNumber}.env` : './.env', override: true });
 
-// const password = process.env.SH_PASSWORD;
-// const mnemonic = process.env.MNEMONIC;
-// const accountName = process.env.ACCOUNT_NAME;
-// const nodeURL = process.env.NODE_URL;
+        const password: string | undefined = process.env.SH_PASSWORD;
+        const mnemonic: string | undefined = process.env.MNEMONIC;
+        const accountName: string | undefined = process.env.ACCOUNT_NAME;
 
-// async function run() {
-//     try {
-//         console.log(`🚀 Configurando Wallet${walletNumber}...`);
+        if (!mnemonic || !password || !accountName) {
+            console.error(`⚠️ Faltan variables en ${walletNumber}.env`);
+            return;
+        }
 
-//         // Configuración del AccountManager
-//         const accountManagerOptions = {
-//             storagePath: `./Wallet${walletNumber}-database`,  
-//             clientOptions: {
-//                 nodes: [nodeURL],  
-//                 localPow: true,
-//             },   
-//             coinType: CoinType.Shimmer, 
-//             secretManager: {
-//                 Stronghold: {
-//                     snapshotPath: `./wallet${walletNumber}.stronghold`,  
-//                     password: password,  
-//                 },
-//             },
-//         };
+        // Ruta de almacenamiento de la base de datos
+        const storagePath = path.resolve(__dirname, `${accountName}-database`);
 
-//         // Crear instancia del AccountManager
-//         const manager = new AccountManager(accountManagerOptions);
+        // Ruta del archivo Stronghold
+        const strongholdPath = path.resolve(__dirname, `wallet${walletNumber}.stronghold`);
 
-//         // Almacenar la mnemónica en el AccountManager
-//         await manager.storeMnemonic(mnemonic);
+        // Eliminar la base de datos y el archivo Stronghold si existen
+        deleteFolderRecursive(storagePath);
 
-//         // Crear una nueva cuenta con el alias especificado
-//         const account = await manager.createAccount({ alias: accountName });
+        if (fs.existsSync(strongholdPath)) {
+            fs.unlinkSync(strongholdPath);
+            console.log(`🗑️ Archivo Stronghold eliminado: wallet${walletNumber}.stronghold`);
+        }
 
-//         console.log(`✅ Wallet${walletNumber} creada con éxito:`);
-//         console.log(account, '\n');
+        const accountManagerOptions = {
+            storagePath: storagePath,
+            clientOptions: {
+                nodes: [nodeURL],
+                localPow: true,
+            },
+            coinType: CoinType.Shimmer,
+            secretManager: {
+                Stronghold: {
+                    snapshotPath: strongholdPath,
+                    password: password,
+                },
+            },
+        };
 
-//         // Sincronizar la cuenta con la red
-//         await account.sync();
+        const manager = new AccountManager(accountManagerOptions);
 
-//         // Obtener y mostrar direcciones
-//         const address = await account.addresses();
-//         console.log(`🏦 Dirección de Wallet${walletNumber}:`);
-//         console.log(address, '\n');
+        await manager.storeMnemonic(mnemonic);
 
-//     } catch (error) {
-//         console.error('❌ Error: ', error);
-//     }
-//     process.exit(0);
-// }
+        const account = await manager.createAccount({
+            alias: accountName,
+        });
 
-// // Ejecutar el script
-// run();
+        console.log(`✅ Wallet${walletNumber} creada con éxito.`);
+        console.log(`${accountName}'s Account:`);
+        console.log(account, '\n');
+
+        await account.sync();
+
+        const addresses = await account.addresses();
+        if (addresses.length > 0) {
+            console.log(`${accountName}'s Address: ${addresses[0].address}`);
+        } else {
+            console.error(`❌ No se encontraron direcciones para Wallet${walletNumber}`);
+        }
+
+    } catch (error) {
+        console.error(`❌ Error en Wallet${walletNumber}:`, error);
+    }
+}
+
+async function setupAllWallets(): Promise<void> {
+    for (let i: number = 4; i <= NUM_WALLETS; i++) {
+        await setupWallet(i);
+    }
+    console.log('🎉 Todas las wallets han sido configuradas.');
+}
+
+setupAllWallets().then(() => process.exit(0));

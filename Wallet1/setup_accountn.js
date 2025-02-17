@@ -34,40 +34,57 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var _a;
-var _b = require('@iota/wallet'), AccountManager = _b.AccountManager, CoinType = _b.CoinType;
-var path = require('path');
+var _a = require('@iota/wallet'), AccountManager = _a.AccountManager, CoinType = _a.CoinType;
+var networkConfig = require('./networkConfig.js');
+var nodeURL = networkConfig.node;
 var fs = require('fs');
-require('dotenv').config();
-// Obtener el número de wallet desde el nombre del archivo .env
-var walletNumber = (_a = path.basename(__filename).match(/\d+/)) === null || _a === void 0 ? void 0 : _a[0];
-if (!walletNumber) {
-    console.error("❌ Error: No se pudo determinar el número de wallet.");
-    process.exit(1);
+var path = require('path');
+var NUM_WALLETS = 10;
+function deleteFolderRecursive(folderPath) {
+    if (fs.existsSync(folderPath)) {
+        fs.readdirSync(folderPath).forEach(function (file) {
+            var curPath = path.join(folderPath, file);
+            if (fs.lstatSync(curPath).isDirectory()) {
+                deleteFolderRecursive(curPath);
+            }
+            else {
+                fs.unlinkSync(curPath);
+            }
+        });
+        fs.rmdirSync(folderPath);
+        console.log("\uD83D\uDDD1\uFE0F Base de datos eliminada: ".concat(folderPath));
+    }
 }
-// Construir la ruta al archivo .env correspondiente
-var envFilePath = path.resolve(__dirname, "".concat(walletNumber, ".env"));
-// Verificar si el archivo .env existe antes de cargarlo
-if (!fs.existsSync(envFilePath)) {
-    console.error("\u274C Error: El archivo ".concat(walletNumber, ".env no existe."));
-    process.exit(1);
-}
-// Cargar el archivo .env de la wallet específica
-require('dotenv').config({ path: envFilePath });
-var password = process.env.SH_PASSWORD;
-var mnemonic = process.env.MNEMONIC;
-var accountName = process.env.ACCOUNT_NAME;
-var nodeURL = process.env.NODE_URL;
-function run() {
+function setupWallet(walletNumber) {
     return __awaiter(this, void 0, void 0, function () {
-        var accountManagerOptions, manager, account, address, error_1;
+        var envFilePath, password, mnemonic, accountName, storagePath, strongholdPath, accountManagerOptions, manager, account, addresses, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     _a.trys.push([0, 5, , 6]);
-                    console.log("\uD83D\uDE80 Configurando Wallet".concat(walletNumber, "..."));
+                    envFilePath = path.resolve(__dirname, "".concat(walletNumber, ".env"));
+                    if (!fs.existsSync(envFilePath)) {
+                        console.error("\u274C Archivo ".concat(walletNumber, ".env no encontrado."));
+                        return [2 /*return*/];
+                    }
+                    require('dotenv').config({ path: walletNumber !== 1 ? "./".concat(walletNumber, ".env") : './.env', override: true });
+                    password = process.env.SH_PASSWORD;
+                    mnemonic = process.env.MNEMONIC;
+                    accountName = process.env.ACCOUNT_NAME;
+                    if (!mnemonic || !password || !accountName) {
+                        console.error("\u26A0\uFE0F Faltan variables en ".concat(walletNumber, ".env"));
+                        return [2 /*return*/];
+                    }
+                    storagePath = path.resolve(__dirname, "".concat(accountName, "-database"));
+                    strongholdPath = path.resolve(__dirname, "wallet".concat(walletNumber, ".stronghold"));
+                    // Eliminar la base de datos y el archivo Stronghold si existen
+                    deleteFolderRecursive(storagePath);
+                    if (fs.existsSync(strongholdPath)) {
+                        fs.unlinkSync(strongholdPath);
+                        console.log("\uD83D\uDDD1\uFE0F Archivo Stronghold eliminado: wallet".concat(walletNumber, ".stronghold"));
+                    }
                     accountManagerOptions = {
-                        storagePath: "./Wallet".concat(walletNumber, "-database"),
+                        storagePath: storagePath,
                         clientOptions: {
                             nodes: [nodeURL],
                             localPow: true
@@ -75,43 +92,67 @@ function run() {
                         coinType: CoinType.Shimmer,
                         secretManager: {
                             Stronghold: {
-                                snapshotPath: "./wallet".concat(walletNumber, ".stronghold"),
+                                snapshotPath: strongholdPath,
                                 password: password
                             }
                         }
                     };
                     manager = new AccountManager(accountManagerOptions);
-                    // Almacenar la mnemónica en el AccountManager
                     return [4 /*yield*/, manager.storeMnemonic(mnemonic)];
                 case 1:
-                    // Almacenar la mnemónica en el AccountManager
                     _a.sent();
-                    return [4 /*yield*/, manager.createAccount({ alias: accountName })];
+                    return [4 /*yield*/, manager.createAccount({
+                            alias: accountName
+                        })];
                 case 2:
                     account = _a.sent();
-                    console.log("\u2705 Wallet".concat(walletNumber, " creada con \u00E9xito:"));
+                    console.log("\u2705 Wallet".concat(walletNumber, " creada con \u00E9xito."));
+                    console.log("".concat(accountName, "'s Account:"));
                     console.log(account, '\n');
-                    // Sincronizar la cuenta con la red
                     return [4 /*yield*/, account.sync()];
                 case 3:
-                    // Sincronizar la cuenta con la red
                     _a.sent();
                     return [4 /*yield*/, account.addresses()];
                 case 4:
-                    address = _a.sent();
-                    console.log("\uD83C\uDFE6 Direcci\u00F3n de Wallet".concat(walletNumber, ":"));
-                    console.log(address, '\n');
+                    addresses = _a.sent();
+                    if (addresses.length > 0) {
+                        console.log("".concat(accountName, "'s Address: ").concat(addresses[0].address));
+                    }
+                    else {
+                        console.error("\u274C No se encontraron direcciones para Wallet".concat(walletNumber));
+                    }
                     return [3 /*break*/, 6];
                 case 5:
                     error_1 = _a.sent();
-                    console.error('❌ Error: ', error_1);
+                    console.error("\u274C Error en Wallet".concat(walletNumber, ":"), error_1);
                     return [3 /*break*/, 6];
-                case 6:
-                    process.exit(0);
+                case 6: return [2 /*return*/];
+            }
+        });
+    });
+}
+function setupAllWallets() {
+    return __awaiter(this, void 0, void 0, function () {
+        var i;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    i = 4;
+                    _a.label = 1;
+                case 1:
+                    if (!(i <= NUM_WALLETS)) return [3 /*break*/, 4];
+                    return [4 /*yield*/, setupWallet(i)];
+                case 2:
+                    _a.sent();
+                    _a.label = 3;
+                case 3:
+                    i++;
+                    return [3 /*break*/, 1];
+                case 4:
+                    console.log('🎉 Todas las wallets han sido configuradas.');
                     return [2 /*return*/];
             }
         });
     });
 }
-// Ejecutar el script
-run();
+setupAllWallets().then(function () { return process.exit(0); });

@@ -1,57 +1,52 @@
-// Importar las bibliotecas necesarias
 import { Utils } from '@iota/sdk';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// Obtener el número de wallet desde el nombre del archivo .env
-const walletNumber = path.basename(__filename).match(/\d+/)?.[0];
-
-if (!walletNumber) {
-    console.error("❌ Error: No se pudo determinar el número de wallet.");
-    process.exit(1);
-}
-
-// Construir la ruta al archivo .env correspondiente
-const envFilePath = path.resolve(__dirname, `${walletNumber}.env`);
-
-// Verificar si el archivo .env existe antes de cargarlo
-if (!fs.existsSync(envFilePath)) {
-    console.error(`❌ Error: El archivo ${walletNumber}.env no existe.`);
-    process.exit(1);
-}
+// Número de wallets a modificar
+const NUM_WALLETS = 10; // Ajusta este número según las wallets que necesites
 
 // Función para actualizar el archivo .env con una nueva clave-valor
-function updateEnvFile(key: string, value: string) {
-    // Lee el contenido del archivo .env
-    let envFileContent = fs.readFileSync(envFilePath, 'utf-8');
-
-    // Si la clave ya existe, actualiza su valor; si no, agrégala al final
-    const newEnvFileContent = envFileContent.includes(`${key}=`)
-        ? envFileContent.split('\n').map(line => 
-            line.startsWith(key) ? `${key}=${value}` : line
-        ).join('\n')
-        : `${envFileContent}\n${key}=${value}`;
-
-    // Escribe el contenido actualizado de nuevo en el archivo .env
-    fs.writeFileSync(envFilePath, newEnvFileContent, 'utf-8');
-}
-
-// Función asincrónica principal
-async function run() {
-    try {
-        // Genera una nueva clave mnemotécnica usando la utilidad de IOTA
-        const mnemonic = Utils.generateMnemonic();
-
-        // Imprime la clave mnemotécnica en la consola
-        console.log(`🔑 Wallet${walletNumber} Mnemonic: ${mnemonic}`);
-
-        // Actualiza el archivo .env de la wallet con la nueva clave mnemotécnica
-        updateEnvFile('MNEMONIC', mnemonic);
-    } catch (error) {
-        // Captura y muestra cualquier error que ocurra durante la ejecución
-        console.error('❌ Error: ', error);
+function updateEnvFile(walletNumber: number, key: string, value: string) {
+    const envFileName = `${walletNumber}.env`;
+    const envPath = path.resolve(__dirname, envFileName);
+    
+    if (!fs.existsSync(envPath)) {
+        console.error(`❌ Archivo ${envFileName} no encontrado.`);
+        return;
     }
+    
+    let envFileContent = fs.readFileSync(envPath, 'utf-8');
+    let updated = false;
+    
+    let newEnvFileContent = envFileContent.split('\n').map(line => {
+        if (line.trim().startsWith(`${key}=`)) {
+            updated = true;
+            return `${key}='${value}'`; // Sustituye la línea existente con comillas
+        }
+        return line;
+    }).join('\n');
+
+    if (!updated) {
+        console.error(`⚠️ No se encontró la clave ${key} en ${envFileName}.`);
+        return;
+    }
+
+    fs.writeFileSync(envPath, newEnvFileContent, 'utf-8');
+    console.log(`✅ Archivo ${envFileName} actualizado con ${key}.`);
 }
 
-// Ejecutar el script
-run().then(() => process.exit());
+// Función principal para generar y actualizar mnemonics
+async function generateMnemonics() {
+    for (let i = 4; i <= NUM_WALLETS; i++) {
+        try {
+            const mnemonic = Utils.generateMnemonic();
+            console.log(`Mnemonic para Wallet${i}: '${mnemonic}'`); // Mostrar con comillas
+            updateEnvFile(i, 'MNEMONIC', mnemonic);
+        } catch (error) {
+            console.error(`❌ Error al generar mnemonic para Wallet${i}:`, error);
+        }
+    }
+    console.log('🎉 Todos los archivos .env han sido actualizados con sus mnemonics.');
+}
+
+generateMnemonics().then(() => process.exit());
