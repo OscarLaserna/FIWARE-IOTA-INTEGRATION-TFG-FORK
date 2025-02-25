@@ -37,7 +37,7 @@ function updateEnvFile(walletNumber: number, key: string, value: string) {
 
 // Función principal para generar y actualizar mnemonics
 async function generateMnemonics() {
-    for (let i = 4; i <= NUM_WALLETS; i++) {
+    for (let i = 1; i <= NUM_WALLETS; i++) {
         try {
             const mnemonic = Utils.generateMnemonic();
             console.log(`Mnemonic para Wallet${i}: '${mnemonic}'`); // Mostrar con comillas

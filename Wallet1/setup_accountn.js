@@ -40,24 +40,29 @@ var nodeURL = networkConfig.node;
 var fs = require('fs');
 var path = require('path');
 var NUM_WALLETS = 10;
-function deleteFolderRecursive(folderPath) {
-    if (fs.existsSync(folderPath)) {
-        fs.readdirSync(folderPath).forEach(function (file) {
-            var curPath = path.join(folderPath, file);
-            if (fs.lstatSync(curPath).isDirectory()) {
-                deleteFolderRecursive(curPath);
-            }
-            else {
-                fs.unlinkSync(curPath);
-            }
-        });
-        fs.rmdirSync(folderPath);
-        console.log("\uD83D\uDDD1\uFE0F Base de datos eliminada: ".concat(folderPath));
+function updateEnvFile(envFilePath, key, value) {
+    var envContent = '';
+    if (fs.existsSync(envFilePath)) {
+        envContent = fs.readFileSync(envFilePath, 'utf8');
     }
+    var envLines = envContent.split('\n');
+    var updated = false;
+    var newEnvLines = envLines.map(function (line) {
+        if (line.startsWith("".concat(key, "="))) {
+            updated = true;
+            return "".concat(key, "=").concat(value);
+        }
+        return line;
+    });
+    if (!updated) {
+        newEnvLines.push("".concat(key, "=").concat(value));
+    }
+    fs.writeFileSync(envFilePath, newEnvLines.join('\n'), 'utf8');
+    console.log("\uD83D\uDCC1 Archivo .env actualizado: ".concat(key, "=").concat(value));
 }
 function setupWallet(walletNumber) {
     return __awaiter(this, void 0, void 0, function () {
-        var envFilePath, password, mnemonic, accountName, storagePath, strongholdPath, accountManagerOptions, manager, account, addresses, error_1;
+        var envFilePath, password, mnemonic, accountName, storagePath, strongholdPath, accountManagerOptions, manager, account, addresses, walletAddress, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -77,8 +82,10 @@ function setupWallet(walletNumber) {
                     }
                     storagePath = path.resolve(__dirname, "".concat(accountName, "-database"));
                     strongholdPath = path.resolve(__dirname, "wallet".concat(walletNumber, ".stronghold"));
-                    // Eliminar la base de datos y el archivo Stronghold si existen
-                    deleteFolderRecursive(storagePath);
+                    if (fs.existsSync(storagePath)) {
+                        fs.rmSync(storagePath, { recursive: true, force: true });
+                        console.log("\uD83D\uDDD1\uFE0F Base de datos eliminada: ".concat(storagePath));
+                    }
                     if (fs.existsSync(strongholdPath)) {
                         fs.unlinkSync(strongholdPath);
                         console.log("\uD83D\uDDD1\uFE0F Archivo Stronghold eliminado: wallet".concat(walletNumber, ".stronghold"));
@@ -101,14 +108,11 @@ function setupWallet(walletNumber) {
                     return [4 /*yield*/, manager.storeMnemonic(mnemonic)];
                 case 1:
                     _a.sent();
-                    return [4 /*yield*/, manager.createAccount({
-                            alias: accountName
-                        })];
+                    return [4 /*yield*/, manager.createAccount({ alias: accountName })];
                 case 2:
                     account = _a.sent();
                     console.log("\u2705 Wallet".concat(walletNumber, " creada con \u00E9xito."));
-                    console.log("".concat(accountName, "'s Account:"));
-                    console.log(account, '\n');
+                    console.log("".concat(accountName, "'s Account:"), account);
                     return [4 /*yield*/, account.sync()];
                 case 3:
                     _a.sent();
@@ -116,7 +120,9 @@ function setupWallet(walletNumber) {
                 case 4:
                     addresses = _a.sent();
                     if (addresses.length > 0) {
-                        console.log("".concat(accountName, "'s Address: ").concat(addresses[0].address));
+                        walletAddress = addresses[0].address;
+                        console.log("".concat(accountName, "'s Address: ").concat(walletAddress));
+                        updateEnvFile(envFilePath, 'WALLET_ADDRESS', walletAddress);
                     }
                     else {
                         console.error("\u274C No se encontraron direcciones para Wallet".concat(walletNumber));
@@ -137,7 +143,7 @@ function setupAllWallets() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    i = 4;
+                    i = 1;
                     _a.label = 1;
                 case 1:
                     if (!(i <= NUM_WALLETS)) return [3 /*break*/, 4];

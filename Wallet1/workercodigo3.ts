@@ -13,8 +13,8 @@ const { truckId, routeFile, walletChoice } = workerData;
 // Seleccionar el archivo .env
 if (walletChoice !=1)
 require('dotenv').config({ path: `./${walletChoice}.env` });
-else 
-require('dotenv').config({ path: `./.env` });
+// else 
+// require('dotenv').config({ path: `./.env` });
 
 let acState = false; // Estado inicial del aire acondicionado
 let temperature = 20.0;
@@ -30,7 +30,7 @@ async function initializeWallet(walletNumber: number): Promise<Wallet> {
         coinType: CoinType.Shimmer,
         secretManager: {
             stronghold: {
-                snapshotPath: walletNumber === 1 ? './wallet.stronghold' : './wallet3.stronghold',
+                snapshotPath: walletNumber === 1 ? './wallet1.stronghold' : './wallet3.stronghold',
                 password: process.env.SH_PASSWORD as string,
             },
         },
@@ -42,8 +42,8 @@ async function sendToIota(wallet: Wallet, payload: string) {
     await account.sync();
 
     const address = walletChoice === 1
-        ? 'rms1qpun0fuekhvjvyhesrnehuvuxq6p2rlwapflg073vtx450ntderdjqjr74w'
-        : 'rms1qqedg4l5g6sxr5k6zs96k6vm66arpgnl0zzx0e9n7j9frtwtmmwzsev0nw4';
+        ? 'smr1qpun0fuekhvjvyhesrnehuvuxq6p2rlwapflg073vtx450ntderdj54gywh'
+        : 'smr1qrv2ercz8ep7e050pdun392448nnvlg3qamj6jlll525nvwwm9yl6usen5k';
 
     const taggedDataPayload: TaggedDataPayload = {
         type: PayloadType.TaggedData,

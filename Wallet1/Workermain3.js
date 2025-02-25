@@ -28,7 +28,7 @@ var rl = require('readline').createInterface({
 var trucks = {};
 // Inicializa los workers para cada camión
 trucks[1] = runWorker(1, './vehicle001-route.json', 1);
-trucks[3] = runWorker(3, './vehicle001-route.json', 3);
+trucks[3] = runWorker(3, './vehicle002-route.json', 3);
 rl.on('line', function (input) {
     var _a = input.split(' '), truckIdStr = _a[0], command = _a[1];
     if (truckIdStr === 'EXIT') {

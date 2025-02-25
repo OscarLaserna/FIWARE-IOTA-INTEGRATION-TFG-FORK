@@ -4,27 +4,36 @@ const nodeURL = networkConfig.node;
 const fs = require('fs');
 const path = require('path');
 
-const NUM_WALLETS: number = 10;
+const NUM_WALLETS = 10;
 
-function deleteFolderRecursive(folderPath: string): void {
-    if (fs.existsSync(folderPath)) {
-        fs.readdirSync(folderPath).forEach((file: string) => {  // <-- Agregado ": string"
-            const curPath = path.join(folderPath, file);
-            if (fs.lstatSync(curPath).isDirectory()) {
-                deleteFolderRecursive(curPath);
-            } else {
-                fs.unlinkSync(curPath);
-            }
-        });
-        fs.rmdirSync(folderPath);
-        console.log(`🗑️ Base de datos eliminada: ${folderPath}`);
+function updateEnvFile(envFilePath: string, key: string, value: string) {
+    let envContent = '';
+    if (fs.existsSync(envFilePath)) {
+        envContent = fs.readFileSync(envFilePath, 'utf8');
     }
+    
+    const envLines = envContent.split('\n');
+    let updated = false;
+    
+    const newEnvLines = envLines.map(line => {
+        if (line.startsWith(`${key}=`)) {
+            updated = true;
+            return `${key}=${value}`;
+        }
+        return line;
+    });
+    
+    if (!updated) {
+        newEnvLines.push(`${key}=${value}`);
+    }
+    
+    fs.writeFileSync(envFilePath, newEnvLines.join('\n'), 'utf8');
+    console.log(`📁 Archivo .env actualizado: ${key}=${value}`);
 }
 
-
-async function setupWallet(walletNumber: number): Promise<void> {
+async function setupWallet(walletNumber: number) {
     try {
-        const envFilePath: string = path.resolve(__dirname, `${walletNumber}.env`);
+        const envFilePath = path.resolve(__dirname, `${walletNumber}.env`);
         if (!fs.existsSync(envFilePath)) {
             console.error(`❌ Archivo ${walletNumber}.env no encontrado.`);
             return;
@@ -32,23 +41,22 @@ async function setupWallet(walletNumber: number): Promise<void> {
 
         require('dotenv').config({ path: walletNumber !== 1 ? `./${walletNumber}.env` : './.env', override: true });
 
-        const password: string | undefined = process.env.SH_PASSWORD;
-        const mnemonic: string | undefined = process.env.MNEMONIC;
-        const accountName: string | undefined = process.env.ACCOUNT_NAME;
+        const password = process.env.SH_PASSWORD;
+        const mnemonic = process.env.MNEMONIC;
+        const accountName = process.env.ACCOUNT_NAME;
 
         if (!mnemonic || !password || !accountName) {
             console.error(`⚠️ Faltan variables en ${walletNumber}.env`);
             return;
         }
 
-        // Ruta de almacenamiento de la base de datos
         const storagePath = path.resolve(__dirname, `${accountName}-database`);
-
-        // Ruta del archivo Stronghold
         const strongholdPath = path.resolve(__dirname, `wallet${walletNumber}.stronghold`);
 
-        // Eliminar la base de datos y el archivo Stronghold si existen
-        deleteFolderRecursive(storagePath);
+        if (fs.existsSync(storagePath)) {
+            fs.rmSync(storagePath, { recursive: true, force: true });
+            console.log(`🗑️ Base de datos eliminada: ${storagePath}`);
+        }
 
         if (fs.existsSync(strongholdPath)) {
             fs.unlinkSync(strongholdPath);
@@ -71,22 +79,19 @@ async function setupWallet(walletNumber: number): Promise<void> {
         };
 
         const manager = new AccountManager(accountManagerOptions);
-
         await manager.storeMnemonic(mnemonic);
-
-        const account = await manager.createAccount({
-            alias: accountName,
-        });
+        const account = await manager.createAccount({ alias: accountName });
 
         console.log(`✅ Wallet${walletNumber} creada con éxito.`);
-        console.log(`${accountName}'s Account:`);
-        console.log(account, '\n');
+        console.log(`${accountName}'s Account:`, account);
 
         await account.sync();
 
         const addresses = await account.addresses();
         if (addresses.length > 0) {
-            console.log(`${accountName}'s Address: ${addresses[0].address}`);
+            const walletAddress = addresses[0].address;
+            console.log(`${accountName}'s Address: ${walletAddress}`);
+            updateEnvFile(envFilePath, 'WALLET_ADDRESS', walletAddress);
         } else {
             console.error(`❌ No se encontraron direcciones para Wallet${walletNumber}`);
         }
@@ -96,8 +101,8 @@ async function setupWallet(walletNumber: number): Promise<void> {
     }
 }
 
-async function setupAllWallets(): Promise<void> {
-    for (let i: number = 4; i <= NUM_WALLETS; i++) {
+async function setupAllWallets() {
+    for (let i = 1; i <= NUM_WALLETS; i++) {
         await setupWallet(i);
     }
     console.log('🎉 Todas las wallets han sido configuradas.');

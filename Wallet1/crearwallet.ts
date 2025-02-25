@@ -13,9 +13,9 @@ function createEnvFile(walletNumber: number) {
     const envContent = `ACCOUNT_NAME=Wallet${walletNumber}
         SH_PASSWORD=Oscar1234!
         MNEMONIC=
-        EXPLORER_URL=https://explorer.shimmer.network/testnet
+        EXPLORER_URL=https://explorer.shimmer.network
         WALLET_DB_PATH=./Wallet${walletNumber}-database
-        NODE_URL=https://api.testnet.shimmer.network`;
+        NODE_URL=https://api.shimmer.network`;
 
     fs.writeFileSync(envFilePath, envContent, 'utf-8');
     console.log(`✅ Archivo ${envFileName} creado.`);
@@ -36,10 +36,8 @@ function runScript(scriptName: string, walletNumber: number) {
 
 // Función principal
 async function main() {
-    for (let i = 4; i <= NUM_WALLETS; i++) {
+    for (let i = 1; i <= NUM_WALLETS; i++) {
         createEnvFile(i);
-        runScript('create_mnemonic.js', i);
-        runScript('setup_account.js', i);
     }
     console.log('🎉 Todas las wallets han sido creadas.');
 }

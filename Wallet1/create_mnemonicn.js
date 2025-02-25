@@ -70,7 +70,7 @@ function generateMnemonics() {
     return __awaiter(this, void 0, void 0, function () {
         var i, mnemonic;
         return __generator(this, function (_a) {
-            for (i = 4; i <= NUM_WALLETS; i++) {
+            for (i = 1; i <= NUM_WALLETS; i++) {
                 try {
                     mnemonic = sdk_1.Utils.generateMnemonic();
                     console.log("Mnemonic para Wallet".concat(i, ": '").concat(mnemonic, "'")); // Mostrar con comillas

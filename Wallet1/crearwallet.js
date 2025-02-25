@@ -56,7 +56,7 @@ var NUM_WALLETS = 10; // Cambia este valor según cuántas wallets quieras crear
 function createEnvFile(walletNumber) {
     var envFileName = "".concat(walletNumber, ".env");
     var envFilePath = path.resolve(__dirname, envFileName);
-    var envContent = "ACCOUNT_NAME=Wallet".concat(walletNumber, "\n        SH_PASSWORD=Oscar1234!\n        MNEMONIC=\n        EXPLORER_URL=https://explorer.shimmer.network/testnet\n        WALLET_DB_PATH=./Wallet").concat(walletNumber, "-database\n        NODE_URL=https://api.testnet.shimmer.network");
+    var envContent = "ACCOUNT_NAME=Wallet".concat(walletNumber, "\n        SH_PASSWORD=Oscar1234!\n        MNEMONIC=\n        EXPLORER_URL=https://explorer.shimmer.network\n        WALLET_DB_PATH=./Wallet").concat(walletNumber, "-database\n        NODE_URL=https://api.shimmer.network");
     fs.writeFileSync(envFilePath, envContent, 'utf-8');
     console.log("\u2705 Archivo ".concat(envFileName, " creado."));
 }
@@ -75,10 +75,8 @@ function main() {
     return __awaiter(this, void 0, void 0, function () {
         var i;
         return __generator(this, function (_a) {
-            for (i = 4; i <= NUM_WALLETS; i++) {
+            for (i = 1; i <= NUM_WALLETS; i++) {
                 createEnvFile(i);
-                runScript('create_mnemonic.js', i);
-                runScript('setup_account.js', i);
             }
             console.log('🎉 Todas las wallets han sido creadas.');
             return [2 /*return*/];

@@ -3,7 +3,7 @@
 // const nodeURL = networkConfig.node;
 
 // // Carga las variables de entorno desde un archivo .env
-// require('dotenv').config({ path: '2.env' });
+// require('dotenv').config({ path: '4.env' });
 // const password = process.env.SH_PASSWORD;  
 // const mnemonic = process.env.MNEMONIC;     
 // const accountName = process.env.ACCOUNT_NAME;  
@@ -21,7 +21,7 @@
 //       coinType: CoinType.Shimmer, 
 //       secretManager: {
 //         Stronghold: {
-//           snapshotPath: `./wallet2.stronghold`,  
+//           snapshotPath: `./wallet4.stronghold`,  
 //           password: `${password}`,  
 //         },
 //       },

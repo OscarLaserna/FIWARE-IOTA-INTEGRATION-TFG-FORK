@@ -46,8 +46,8 @@ var truckId = worker_threads_1.workerData.truckId, routeFile = worker_threads_1.
 // Seleccionar el archivo .env
 if (walletChoice != 1)
     require('dotenv').config({ path: "./".concat(walletChoice, ".env") });
-else
-    require('dotenv').config({ path: "./.env" });
+// else 
+// require('dotenv').config({ path: `./.env` });
 var acState = false; // Estado inicial del aire acondicionado
 var temperature = 20.0;
 function utf8ToHex(str) {
@@ -62,7 +62,7 @@ function initializeWallet(walletNumber) {
                     coinType: sdk_1.CoinType.Shimmer,
                     secretManager: {
                         stronghold: {
-                            snapshotPath: walletNumber === 1 ? './wallet.stronghold' : './wallet3.stronghold',
+                            snapshotPath: walletNumber === 1 ? './wallet1.stronghold' : './wallet3.stronghold',
                             password: process.env.SH_PASSWORD
                         }
                     }
@@ -82,8 +82,8 @@ function sendToIota(wallet, payload) {
                 case 2:
                     _a.sent();
                     address = walletChoice === 1
-                        ? 'rms1qpun0fuekhvjvyhesrnehuvuxq6p2rlwapflg073vtx450ntderdjqjr74w'
-                        : 'rms1qqedg4l5g6sxr5k6zs96k6vm66arpgnl0zzx0e9n7j9frtwtmmwzsev0nw4';
+                        ? 'smr1qpun0fuekhvjvyhesrnehuvuxq6p2rlwapflg073vtx450ntderdj54gywh'
+                        : 'smr1qrv2ercz8ep7e050pdun392448nnvlg3qamj6jlll525nvwwm9yl6usen5k';
                     taggedDataPayload = {
                         type: sdk_1.PayloadType.TaggedData,
                         tag: utf8ToHex('/ul/iot1234/device001/attrs'),
