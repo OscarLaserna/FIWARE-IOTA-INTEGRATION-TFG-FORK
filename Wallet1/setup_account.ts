@@ -13,20 +13,19 @@
 //   try {
 //     // Configuración de opciones para el AccountManager
 //     const accountManagerOptions = {
-//       storagePath: `./${accountName}-database`,  
-//       clientOptions: {
-//         nodes: [nodeURL],  
-//         localPow: true,
-//       },   
-//       coinType: CoinType.Shimmer, 
-//       secretManager: {
-//         Stronghold: {
-//           snapshotPath: `./wallet4.stronghold`,  
-//           password: `${password}`,  
+//         storagePath: `./${accountName}-database`,  
+//         clientOptions: {
+//             nodes: [nodeURL],  
+//             localPow: true,
+//         },   
+//         coinType: 4219,  // IOTA Testnet
+//         secretManager: {
+//             Stronghold: {
+//                 snapshotPath: `./wallet4.stronghold`,  
+//                 password: `${password}`,  
+//             },
 //         },
-//       },
 //     };
-
 //     // Crea una nueva instancia de AccountManager con las opciones configuradas
 //     const manager = new AccountManager(accountManagerOptions);
 

@@ -143,7 +143,7 @@ function setupAllWallets() {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    i = 1;
+                    i = 5;
                     _a.label = 1;
                 case 1:
                     if (!(i <= NUM_WALLETS)) return [3 /*break*/, 4];

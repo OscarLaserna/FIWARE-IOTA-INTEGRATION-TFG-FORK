@@ -27,10 +27,11 @@ async function initializeWallet(walletNumber: number): Promise<Wallet> {
     return new Wallet({
         storagePath: process.env.WALLET_DB_PATH,
         clientOptions: { nodes: [process.env.NODE_URL as string] },
-        coinType: CoinType.Shimmer,
+        coinType: 4219,
         secretManager: {
             stronghold: {
-                snapshotPath: walletNumber === 1 ? './wallet1.stronghold' : './wallet3.stronghold',
+                // snapshotPath: walletNumber === 5 ? './wallet5.stronghold' : './wallet6.stronghold',
+                snapshotPath: `./wallet${walletNumber}.stronghold`,
                 password: process.env.SH_PASSWORD as string,
             },
         },
@@ -41,9 +42,7 @@ async function sendToIota(wallet: Wallet, payload: string) {
     const account = await wallet.getAccount(process.env.ACCOUNT_NAME!);
     await account.sync();
 
-    const address = walletChoice === 1
-        ? 'smr1qpun0fuekhvjvyhesrnehuvuxq6p2rlwapflg073vtx450ntderdj54gywh'
-        : 'smr1qrv2ercz8ep7e050pdun392448nnvlg3qamj6jlll525nvwwm9yl6usen5k';
+    const address = process.env.WALLET_ADDRESS!;
 
     const taggedDataPayload: TaggedDataPayload = {
         type: PayloadType.TaggedData,
@@ -94,7 +93,7 @@ let wallet: Wallet;
         temperature += acState ? -Math.random() * 0.5 : Math.random() * 0.5;
         temperature = Math.max(15, Math.min(temperature, 30));
 
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        await new Promise(resolve => setTimeout(resolve, 2000));
     }
 
     parentPort?.postMessage(`✅ Finished simulation`);

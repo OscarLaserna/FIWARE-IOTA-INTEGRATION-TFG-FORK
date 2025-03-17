@@ -102,7 +102,7 @@ async function setupWallet(walletNumber: number) {
 }
 
 async function setupAllWallets() {
-    for (let i = 1; i <= NUM_WALLETS; i++) {
+    for (let i = 5; i <= NUM_WALLETS; i++) {
         await setupWallet(i);
     }
     console.log('🎉 Todas las wallets han sido configuradas.');

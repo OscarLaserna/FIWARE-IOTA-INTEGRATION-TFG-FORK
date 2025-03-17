@@ -40,66 +40,43 @@ var sdk_1 = require("@iota/sdk");
 var fs = require("fs");
 var path = require("path");
 var readline = require("readline");
-require('dotenv').config();
+require('dotenv').config({ path: './4.env' }); // Asegúrate de cargar el archivo .env4
 // Función para convertir una cadena UTF-8 a hexadecimal
 function utf8ToHex(str) {
     return '0x' + Buffer.from(str, 'utf8').toString('hex');
 }
-var walletInstance1 = null;
-var walletInstance3 = null;
+var walletInstance = null;
 var acStates = {}; // Estado del aire acondicionado por camión
-// Inicializa la wallet 1 (Wallet1)
-function initializeWallet1() {
+// Inicializar la wallet usando el archivo .env4
+function initializeWallet() {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
-            if (!walletInstance1) {
-                walletInstance1 = new sdk_1.Wallet({
+            if (!walletInstance) {
+                walletInstance = new sdk_1.Wallet({
                     storagePath: process.env.WALLET_DB_PATH,
                     clientOptions: {
                         nodes: [process.env.NODE_URL]
                     },
-                    coinType: sdk_1.CoinType.Shimmer,
+                    coinType: 4219,
                     secretManager: {
                         stronghold: {
-                            snapshotPath: './wallet.stronghold',
+                            snapshotPath: './wallet4.stronghold',
                             password: process.env.SH_PASSWORD
                         }
                     }
                 });
             }
-            return [2 /*return*/, walletInstance1];
+            return [2 /*return*/, walletInstance];
         });
     });
 }
-function initializeWallet3() {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            if (!walletInstance3) {
-                walletInstance3 = new sdk_1.Wallet({
-                    storagePath: './Wallet3-database',
-                    clientOptions: {
-                        nodes: [process.env.NODE_URL]
-                    },
-                    coinType: sdk_1.CoinType.Shimmer,
-                    secretManager: {
-                        stronghold: {
-                            snapshotPath: './wallet3.stronghold',
-                            password: process.env.SH_PASSWORD
-                        }
-                    }
-                });
-            }
-            return [2 /*return*/, walletInstance3];
-        });
-    });
-}
-// Envía datos a IOTA usando la wallet 1
-function sendToIotaWallet1(payload) {
+// Envía datos a IOTA
+function sendToIota(payload) {
     return __awaiter(this, void 0, void 0, function () {
         var wallet, account, address, taggedDataPayload, response;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, initializeWallet1()];
+                case 0: return [4 /*yield*/, initializeWallet()];
                 case 1:
                     wallet = _a.sent();
                     return [4 /*yield*/, wallet.getAccount(process.env.ACCOUNT_NAME)];
@@ -108,7 +85,7 @@ function sendToIotaWallet1(payload) {
                     return [4 /*yield*/, account.sync()];
                 case 3:
                     _a.sent();
-                    address = 'rms1qpun0fuekhvjvyhesrnehuvuxq6p2rlwapflg073vtx450ntderdjqjr74w';
+                    address = 'tst1qzxynkw7zxesjr2x50mre25dtva03tpgrwwtnfrmqcakwft7pd09jlj979x';
                     taggedDataPayload = {
                         type: sdk_1.PayloadType.TaggedData,
                         tag: utf8ToHex('/ul/iot1234/device001/attrs'),
@@ -118,45 +95,14 @@ function sendToIotaWallet1(payload) {
                     return [4 /*yield*/, account.send(BigInt(50600), address, { taggedDataPayload: taggedDataPayload })];
                 case 4:
                     response = _a.sent();
-                    console.log("Block sent to Wallet1: ".concat(process.env.EXPLORER_URL, "/block/").concat(response.blockId));
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-// Envía datos a IOTA usando la wallet 3
-function sendToIotaWallet3(payload) {
-    return __awaiter(this, void 0, void 0, function () {
-        var wallet, account, address, taggedDataPayload, response;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, initializeWallet3()];
-                case 1:
-                    wallet = _a.sent();
-                    return [4 /*yield*/, wallet.getAccount('Wallet3')];
-                case 2:
-                    account = _a.sent();
-                    return [4 /*yield*/, account.sync()];
-                case 3:
-                    _a.sent();
-                    address = 'rms1qqedg4l5g6sxr5k6zs96k6vm66arpgnl0zzx0e9n7j9frtwtmmwzsev0nw4';
-                    taggedDataPayload = {
-                        type: sdk_1.PayloadType.TaggedData,
-                        tag: utf8ToHex('/ul/iot1234/device001/attrs'),
-                        data: utf8ToHex(payload),
-                        getType: function () { return sdk_1.PayloadType.TaggedData; }
-                    };
-                    return [4 /*yield*/, account.send(BigInt(50600), address, { taggedDataPayload: taggedDataPayload })];
-                case 4:
-                    response = _a.sent();
-                    console.log("Block sent to Wallet3: ".concat(process.env.EXPLORER_URL, "/block/").concat(response.blockId));
+                    console.log("Block sent: ".concat(process.env.EXPLORER_URL, "/block/").concat(response.blockId));
                     return [2 /*return*/];
             }
         });
     });
 }
 // Simula el camión
-function simulateTruck(routeFile, truckId, walletChoice) {
+function simulateTruck(routeFile, truckId) {
     return __awaiter(this, void 0, void 0, function () {
         var route, temperature, i, point, payload, error_1;
         return __generator(this, function (_a) {
@@ -168,35 +114,27 @@ function simulateTruck(routeFile, truckId, walletChoice) {
                     i = 0;
                     _a.label = 1;
                 case 1:
-                    if (!(i < route.length)) return [3 /*break*/, 11];
+                    if (!(i < route.length)) return [3 /*break*/, 8];
                     point = route[i];
                     // Verifica que las coordenadas existan
                     if (!point || point.length < 2) {
                         console.error("Truck ".concat(truckId, ": Invalid GPS point:"), point);
-                        return [3 /*break*/, 10];
+                        return [3 /*break*/, 7];
                     }
                     payload = "truck|".concat(truckId, "|t|").concat(temperature.toFixed(1), "|ac|").concat(acStates[truckId] ? 'on' : 'off', "|gps|").concat(point[1], ",").concat(point[0]);
                     console.log("Truck ".concat(truckId, ": Sending data: ").concat(payload));
                     _a.label = 2;
                 case 2:
-                    _a.trys.push([2, 7, , 8]);
-                    if (!(walletChoice === 1)) return [3 /*break*/, 4];
-                    return [4 /*yield*/, sendToIotaWallet1(payload)];
+                    _a.trys.push([2, 4, , 5]);
+                    return [4 /*yield*/, sendToIota(payload)];
                 case 3:
                     _a.sent();
-                    return [3 /*break*/, 6];
+                    return [3 /*break*/, 5];
                 case 4:
-                    if (!(walletChoice === 3)) return [3 /*break*/, 6];
-                    return [4 /*yield*/, sendToIotaWallet3(payload)];
-                case 5:
-                    _a.sent();
-                    _a.label = 6;
-                case 6: return [3 /*break*/, 8];
-                case 7:
                     error_1 = _a.sent();
                     console.error("Truck ".concat(truckId, ": Error sending to IOTA:"), error_1);
-                    return [3 /*break*/, 11]; // Detén el ciclo si hay un error
-                case 8:
+                    return [3 /*break*/, 8]; // Detén el ciclo si hay un error
+                case 5:
                     // Actualizar la temperatura
                     if (acStates[truckId]) {
                         temperature -= Math.random() * 0.5; // Si el aire está encendido, baja la temperatura
@@ -207,14 +145,14 @@ function simulateTruck(routeFile, truckId, walletChoice) {
                     temperature = Math.max(15, Math.min(temperature, 30));
                     // Esperar 1 segundo antes de enviar el siguiente punto
                     return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 1000); })];
-                case 9:
+                case 6:
                     // Esperar 1 segundo antes de enviar el siguiente punto
                     _a.sent();
-                    _a.label = 10;
-                case 10:
+                    _a.label = 7;
+                case 7:
                     i++;
                     return [3 /*break*/, 1];
-                case 11:
+                case 8:
                     console.log("Truck ".concat(truckId, " finished simulation"));
                     return [2 /*return*/];
             }
@@ -274,11 +212,10 @@ function launchTrucks(routeFile, numTrucks, interval) {
                 case 0:
                     truckPromises = [];
                     _loop_1 = function (i) {
-                        var walletChoice = i % 2 === 0 ? 1 : 3; // Asigna Wallet3 a los camiones impares y Wallet1 a los pares
                         // Lanza cada camión después de un intervalo
                         truckPromises.push(new Promise(function (resolve) {
                             setTimeout(function () {
-                                simulateTruck(routeFile, i + 1, walletChoice).then(function () {
+                                simulateTruck(routeFile, i + 1).then(function () {
                                     console.log("Truck ".concat(i + 1, " finished simulation"));
                                     resolve();
                                 })["catch"](function (err) {
@@ -306,4 +243,4 @@ function launchTrucks(routeFile, numTrucks, interval) {
 // Ejecuta la simulación con un intervalo de 5 segundos
 var routeFile = './vehicle001-route.json';
 setupUserInput();
-launchTrucks(routeFile, 2, 5000)["catch"](function (err) { return console.error('Error:', err); }); // 2 camiones con 5 segundos de intervalo
+launchTrucks(routeFile, 1, 5000)["catch"](function (err) { return console.error('Error:', err); }); // 2 camiones con 5 segundos de intervalo

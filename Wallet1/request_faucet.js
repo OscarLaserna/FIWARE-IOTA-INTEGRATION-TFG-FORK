@@ -1,28 +1,24 @@
-// Importar las bibliotecas necesarias
 const fetch = require('node-fetch');
-
-// Importa la configuración de red desde networkConfig.js
 const networkConfig = require('./networkConfig.js');
+
+// Dirección de recepción en IOTA Testnet
+const receivingAddress = 'tst1qzxynkw7zxesjr2x50mre25dtva03tpgrwwtnfrmqcakwft7pd09jlj979x';
+
+// URL del faucet desde networkConfig.js
 const faucetApi = networkConfig.faucetApi;
 
-// Define la dirección de recepción en formato Bech32
-const receivingAddress = 'rms1qqphz3plmrx8p86kfvq00cs3rcn5p78edjh90hue0tcsae854esrjghl5nz';
-//const receivingAddress = 'rms1qpun0fuekhvjvyhesrnehuvuxq6p2rlwapflg073vtx450ntderdjqjr74w';
-//const receivingAddress = 'rms1qqedg4l5g6sxr5k6zs96k6vm66arpgnl0zzx0e9n7j9frtwtmmwzsev0nw4';
-// Función asincrónica principal
 async function run() {
-  // Llama a la función para solicitar fondos desde el faucet y espera su resultado
-  const request = await requestFunds(faucetApi, receivingAddress);
-
-  // Imprime un mensaje en la consola indicando que los fondos fueron solicitados desde el faucet
-  console.log(`Funds were requested from faucet:`);
-  console.log(request, '\n');
+  try {
+    const request = await requestFunds(faucetApi, receivingAddress);
+    console.log(`Funds were requested from faucet:`, request);
+  } catch (error) {
+    console.error('Error requesting funds:', error);
+  }
 }
 
-// Función asincrónica para solicitar fondos desde el faucet
+// Función para solicitar fondos al faucet
 async function requestFunds(faucetUrl, addressBech32) {
-  // Realiza una solicitud POST a la URL del faucet
-  const requestFunds = await fetch(faucetUrl, {
+  const response = await fetch(faucetUrl, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -30,6 +26,12 @@ async function requestFunds(faucetUrl, addressBech32) {
     },
     body: JSON.stringify({ address: addressBech32 }),
   });
-  return await requestFunds.json();
+
+  if (!response.ok) {
+    throw new Error(`Faucet request failed: ${response.statusText}`);
+  }
+
+  return await response.json();
 }
+
 run();

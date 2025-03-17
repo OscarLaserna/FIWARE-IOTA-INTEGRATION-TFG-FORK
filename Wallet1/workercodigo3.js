@@ -59,10 +59,11 @@ function initializeWallet(walletNumber) {
             return [2 /*return*/, new sdk_1.Wallet({
                     storagePath: process.env.WALLET_DB_PATH,
                     clientOptions: { nodes: [process.env.NODE_URL] },
-                    coinType: sdk_1.CoinType.Shimmer,
+                    coinType: 4219,
                     secretManager: {
                         stronghold: {
-                            snapshotPath: walletNumber === 1 ? './wallet1.stronghold' : './wallet3.stronghold',
+                            // snapshotPath: walletNumber === 5 ? './wallet5.stronghold' : './wallet6.stronghold',
+                            snapshotPath: "./wallet".concat(walletNumber, ".stronghold"),
                             password: process.env.SH_PASSWORD
                         }
                     }
@@ -81,9 +82,7 @@ function sendToIota(wallet, payload) {
                     return [4 /*yield*/, account.sync()];
                 case 2:
                     _a.sent();
-                    address = walletChoice === 1
-                        ? 'smr1qpun0fuekhvjvyhesrnehuvuxq6p2rlwapflg073vtx450ntderdj54gywh'
-                        : 'smr1qrv2ercz8ep7e050pdun392448nnvlg3qamj6jlll525nvwwm9yl6usen5k';
+                    address = process.env.WALLET_ADDRESS;
                     taggedDataPayload = {
                         type: sdk_1.PayloadType.TaggedData,
                         tag: utf8ToHex('/ul/iot1234/device001/attrs'),
@@ -144,7 +143,7 @@ var wallet;
             case 6:
                 temperature += acState ? -Math.random() * 0.5 : Math.random() * 0.5;
                 temperature = Math.max(15, Math.min(temperature, 30));
-                return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 5000); })];
+                return [4 /*yield*/, new Promise(function (resolve) { return setTimeout(resolve, 500); })];
             case 7:
                 _a.sent();
                 _a.label = 8;

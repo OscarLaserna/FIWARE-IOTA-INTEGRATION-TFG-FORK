@@ -11,12 +11,12 @@ function createEnvFile(walletNumber: number) {
     const envFilePath = path.resolve(__dirname, envFileName);
     
     const envContent = `ACCOUNT_NAME=Wallet${walletNumber}
-        SH_PASSWORD=Oscar1234!
-        MNEMONIC=
-        EXPLORER_URL=https://explorer.shimmer.network
-        WALLET_DB_PATH=./Wallet${walletNumber}-database
-        NODE_URL=https://api.shimmer.network`;
-
+            SH_PASSWORD=Oscar1234!
+            MNEMONIC=
+            EXPLORER_URL=https://explorer.rebased.iota.org/?network=testnet
+            WALLET_DB_PATH=./Wallet${walletNumber}-database
+            NODE_URL=https://api.testnet.iotaledger.net
+`;
     fs.writeFileSync(envFilePath, envContent, 'utf-8');
     console.log(`✅ Archivo ${envFileName} creado.`);
 }

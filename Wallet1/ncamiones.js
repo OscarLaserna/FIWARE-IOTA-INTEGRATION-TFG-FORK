@@ -40,7 +40,7 @@ var sdk_1 = require("@iota/sdk");
 var fs = require("fs");
 var path = require("path");
 var readline = require("readline");
-require('dotenv').config();
+require('dotenv').config({ path: './4.env' });
 // Función para convertir una cadena UTF-8 a hexadecimal
 function utf8ToHex(str) {
     return '0x' + Buffer.from(str, 'utf8').toString('hex');
@@ -57,10 +57,10 @@ function initializeWallet() {
                     clientOptions: {
                         nodes: [process.env.NODE_URL]
                     },
-                    coinType: sdk_1.CoinType.Shimmer,
+                    coinType: 4219,
                     secretManager: {
                         stronghold: {
-                            snapshotPath: './v3.stronghold',
+                            snapshotPath: './wallet4.stronghold',
                             password: process.env.SH_PASSWORD
                         }
                     }
@@ -85,7 +85,7 @@ function sendToIota(payload) {
                     return [4 /*yield*/, account.sync()];
                 case 3:
                     _a.sent();
-                    address = 'rms1qpun0fuekhvjvyhesrnehuvuxq6p2rlwapflg073vtx450ntderdjqjr74w';
+                    address = 'tst1qzxynkw7zxesjr2x50mre25dtva03tpgrwwtnfrmqcakwft7pd09jlj979x';
                     taggedDataPayload = {
                         type: sdk_1.PayloadType.TaggedData,
                         tag: utf8ToHex('/ul/iot1234/device001/attrs'),
@@ -116,7 +116,6 @@ function simulateTruck(routeFile, truckId) {
                 case 1:
                     if (!(i < route.length)) return [3 /*break*/, 7];
                     point = route[i];
-                    // Verifica que las coordenadas existan
                     if (!point || point.length < 2) {
                         console.error("Truck ".concat(truckId, ": Invalid GPS point:"), point);
                         return [3 /*break*/, 6];
@@ -133,14 +132,13 @@ function simulateTruck(routeFile, truckId) {
                 case 4:
                     error_1 = _a.sent();
                     console.error("Truck ".concat(truckId, ": Error sending to IOTA:"), error_1);
-                    return [3 /*break*/, 7]; // Detén el ciclo si hay un error
+                    return [3 /*break*/, 7];
                 case 5:
-                    // Actualizar la temperatura
                     if (acStates[truckId]) {
-                        temperature -= Math.random() * 0.5; // Si el aire está encendido, baja la temperatura
+                        temperature -= Math.random() * 0.5;
                     }
                     else {
-                        temperature += Math.random() * 0.5; // Si el aire está apagado, sube la temperatura
+                        temperature += Math.random() * 0.5;
                     }
                     temperature = Math.max(15, Math.min(temperature, 30));
                     _a.label = 6;
@@ -199,31 +197,27 @@ function setupUserInput() {
     });
 }
 // Lanza múltiples camiones con un intervalo
-// async function launchTrucks(routeFile: string, numTrucks: number, duration: number) {
-//     const interval = duration / numTrucks; // Tiempo entre lanzamientos
-//     const truckPromises: Promise<void>[] = []; // Para almacenar las promesas de cada camión
-//     for (let i = 0; i < numTrucks; i++) {
-//         // Añadir cada simulación a la lista de promesas
-//         truckPromises.push(simulateTruck(routeFile, i + 1));
-//     }
-//     // Esperar que todas las simulaciones se terminen
-//     await Promise.all(truckPromises);
-//     console.log('All trucks have finished the simulation');
-//     process.exit(0); // Finalizar el proceso después de que todos los camiones hayan terminado
-// }
-function launchTrucks(routeFile, numTrucks) {
+function launchTrucks(routeFile, numTrucks, duration) {
     return __awaiter(this, void 0, void 0, function () {
-        var i;
+        var truckPromises, i;
         return __generator(this, function (_a) {
-            for (i = 0; i < numTrucks; i++) {
-                simulateTruck(routeFile, i + 1); // Inicia cada camión sin esperar
+            switch (_a.label) {
+                case 0:
+                    truckPromises = [];
+                    for (i = 0; i < numTrucks; i++) {
+                        truckPromises.push(simulateTruck(routeFile, i + 1));
+                    }
+                    return [4 /*yield*/, Promise.all(truckPromises)];
+                case 1:
+                    _a.sent();
+                    console.log('All trucks have finished the simulation');
+                    process.exit(0);
+                    return [2 /*return*/];
             }
-            return [2 /*return*/];
         });
     });
 }
 // Ejecuta la simulación
 var routeFile = './vehicle001-route.json';
 setupUserInput();
-launchTrucks(routeFile, 50)["catch"](function (err) { return console.error('Error:', err); });
-//launchTrucks(routeFile, 50, 3).catch(err => console.error('Error:', err));
+launchTrucks(routeFile, 1, 3)["catch"](function (err) { return console.error('Error:', err); });

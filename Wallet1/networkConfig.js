@@ -1,6 +1,9 @@
 module.exports = {
-    node: 'https://api.shimmer.network',  // Nueva URL del nodo para Shimmer L1
-    faucetWebsite: 'https://faucet.shimmer.network',  // Faucet para Shimmer L1
-    faucetApi: 'https://faucet.shimmer.network/api/enqueue',  // API del faucet
-    explorer: 'https://explorer.shimmer.network',  // Explorador de Shimmer L1
+    node: 'https://api.testnet.iotaledger.net',  // Nodo alternativo de IOTA Testnet
+    faucetWebsite: 'https://faucet.testnet.iotaledger.net',
+    faucetApi: 'https://faucet.testnet.iotaledger.net/api/enqueue',
+    explorer: 'https://explorer.rebased.iota.org/?network=testnet',
+    indexerRpc: 'https://indexer.testnet.iotaledger.net',
+    graphqlRpc: 'https://graphql.testnet.iotaledger.net',
+    websocketRpc: 'wss://api.testnet.iotaledger.net'
 };

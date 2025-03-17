@@ -54,7 +54,7 @@ async function requestFunds(faucetUrl, addressBech32) {
 
 // Función principal para iterar sobre todas las wallets y solicitar fondos con delay
 async function requestFundsForAllWallets() {
-    for (let i = 4; i <= NUM_WALLETS; i++) {
+    for (let i = 5; i <= NUM_WALLETS; i++) {
         const walletAddress = getWalletAddress(i);
         if (walletAddress) {
             await requestFunds(faucetApi, walletAddress);

@@ -56,7 +56,7 @@ function run() {
                             nodes: [nodeURL],
                             localPow: true
                         },
-                        coinType: CoinType.Shimmer,
+                        coinType: 4219,
                         secretManager: {
                             Stronghold: {
                                 snapshotPath: "./wallet4.stronghold",

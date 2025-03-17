@@ -2,63 +2,43 @@ import { Wallet, CoinType, TaggedDataPayload, PayloadType } from '@iota/sdk';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
-require('dotenv').config();
+require('dotenv').config({ path: './4.env' });  // Asegúrate de cargar el archivo .env4
 
 // Función para convertir una cadena UTF-8 a hexadecimal
 function utf8ToHex(str: string): string {
     return '0x' + Buffer.from(str, 'utf8').toString('hex');
 }
 
-let walletInstance1: Wallet | null = null;
-let walletInstance3: Wallet | null = null;
+let walletInstance: Wallet | null = null;
 let acStates: { [key: number]: boolean } = {}; // Estado del aire acondicionado por camión
 
-// Inicializa la wallet 1 (Wallet1)
-async function initializeWallet1(): Promise<Wallet> {
-    if (!walletInstance1) {
-        walletInstance1 = new Wallet({
-            storagePath: process.env.WALLET_DB_PATH,
+// Inicializar la wallet usando el archivo .env4
+async function initializeWallet(): Promise<Wallet> {
+    if (!walletInstance) {
+        walletInstance = new Wallet({
+            storagePath: process.env.WALLET_DB_PATH,  // Ruta para almacenar la base de datos
             clientOptions: {
-                nodes: [process.env.NODE_URL as string],
+                nodes: [process.env.NODE_URL as string],  // Nodo de IOTA especificado
             },
-            coinType: CoinType.Shimmer,
+            coinType: 4219,  // Usamos el coinType IOTA
             secretManager: {
                 stronghold: {
-                    snapshotPath: './wallet.stronghold',
-                    password: process.env.SH_PASSWORD as string,
+                    snapshotPath: './wallet4.stronghold',  // Ruta de la wallet
+                    password: process.env.SH_PASSWORD as string,  // Contraseña de la wallet
                 },
             },
         });
     }
-    return walletInstance1;
+    return walletInstance;
 }
 
-async function initializeWallet3(): Promise<Wallet> {
-    if (!walletInstance3) {
-        walletInstance3 = new Wallet({
-            storagePath: './Wallet3-database', // Usa la carpeta Wallet3-database
-            clientOptions: {
-                nodes: [process.env.NODE_URL as string],
-            },
-            coinType: CoinType.Shimmer,
-            secretManager: {
-                stronghold: {
-                    snapshotPath: './wallet3.stronghold', // Asegúrate de que esté usando el archivo correcto
-                    password: process.env.SH_PASSWORD as string,
-                },
-            },
-        });
-    }
-    return walletInstance3;
-}
-
-// Envía datos a IOTA usando la wallet 1
-async function sendToIotaWallet1(payload: string) {
-    const wallet = await initializeWallet1();
+// Envía datos a IOTA
+async function sendToIota(payload: string) {
+    const wallet = await initializeWallet();
     const account = await wallet.getAccount(process.env.ACCOUNT_NAME!);
     await account.sync();
 
-    const address = 'rms1qpun0fuekhvjvyhesrnehuvuxq6p2rlwapflg073vtx450ntderdjqjr74w';
+    const address = 'tst1qzxynkw7zxesjr2x50mre25dtva03tpgrwwtnfrmqcakwft7pd09jlj979x';  // Usamos la dirección de la wallet desde el archivo .env4
     const taggedDataPayload: TaggedDataPayload = {
         type: PayloadType.TaggedData,
         tag: utf8ToHex('/ul/iot1234/device001/attrs'),
@@ -67,29 +47,11 @@ async function sendToIotaWallet1(payload: string) {
     };
 
     const response = await account.send(BigInt(50600), address, { taggedDataPayload });
-    console.log(`Block sent to Wallet1: ${process.env.EXPLORER_URL}/block/${response.blockId}`);
-}
-
-// Envía datos a IOTA usando la wallet 3
-async function sendToIotaWallet3(payload: string) {
-    const wallet = await initializeWallet3();
-    const account = await wallet.getAccount('Wallet3');
-    await account.sync();
-
-    const address = 'rms1qqedg4l5g6sxr5k6zs96k6vm66arpgnl0zzx0e9n7j9frtwtmmwzsev0nw4';
-    const taggedDataPayload: TaggedDataPayload = {
-        type: PayloadType.TaggedData,
-        tag: utf8ToHex('/ul/iot1234/device001/attrs'),
-        data: utf8ToHex(payload),
-        getType: () => PayloadType.TaggedData,
-    };
-
-    const response = await account.send(BigInt(50600), address, { taggedDataPayload });
-    console.log(`Block sent to Wallet3: ${process.env.EXPLORER_URL}/block/${response.blockId}`);
+    console.log(`Block sent: ${process.env.EXPLORER_URL}/block/${response.blockId}`);
 }
 
 // Simula el camión
-async function simulateTruck(routeFile: string, truckId: number, walletChoice: number): Promise<void> {
+async function simulateTruck(routeFile: string, truckId: number): Promise<void> {
     const route = loadRoute(routeFile);
     let temperature = 20.0;
 
@@ -109,11 +71,7 @@ async function simulateTruck(routeFile: string, truckId: number, walletChoice: n
         console.log(`Truck ${truckId}: Sending data: ${payload}`);
 
         try {
-            if (walletChoice === 1) {
-                await sendToIotaWallet1(payload);
-            } else if (walletChoice === 3) {
-                await sendToIotaWallet3(payload);
-            }
+            await sendToIota(payload);
         } catch (error) {
             console.error(`Truck ${truckId}: Error sending to IOTA:`, error);
             break; // Detén el ciclo si hay un error
@@ -185,12 +143,10 @@ async function launchTrucks(routeFile: string, numTrucks: number, interval: numb
     const truckPromises: Promise<void>[] = []; // Para almacenar las promesas de cada camión
 
     for (let i = 0; i < numTrucks; i++) {
-        const walletChoice = i % 2 === 0 ? 1 : 3; // Asigna Wallet3 a los camiones impares y Wallet1 a los pares
-
         // Lanza cada camión después de un intervalo
         truckPromises.push(new Promise<void>(resolve => {
             setTimeout(() => {
-                simulateTruck(routeFile, i + 1, walletChoice).then(() => {
+                simulateTruck(routeFile, i + 1).then(() => {
                     console.log(`Truck ${i + 1} finished simulation`);
                     resolve();
                 }).catch(err => {
@@ -211,4 +167,4 @@ async function launchTrucks(routeFile: string, numTrucks: number, interval: numb
 // Ejecuta la simulación con un intervalo de 5 segundos
 const routeFile = './vehicle001-route.json';
 setupUserInput();
-launchTrucks(routeFile, 2, 5000).catch(err => console.error('Error:', err)); // 2 camiones con 5 segundos de intervalo
+launchTrucks(routeFile, 1, 5000).catch(err => console.error('Error:', err)); // 2 camiones con 5 segundos de intervalo

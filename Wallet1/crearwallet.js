@@ -56,7 +56,7 @@ var NUM_WALLETS = 10; // Cambia este valor según cuántas wallets quieras crear
 function createEnvFile(walletNumber) {
     var envFileName = "".concat(walletNumber, ".env");
     var envFilePath = path.resolve(__dirname, envFileName);
-    var envContent = "ACCOUNT_NAME=Wallet".concat(walletNumber, "\n        SH_PASSWORD=Oscar1234!\n        MNEMONIC=\n        EXPLORER_URL=https://explorer.shimmer.network\n        WALLET_DB_PATH=./Wallet").concat(walletNumber, "-database\n        NODE_URL=https://api.shimmer.network");
+    var envContent = "ACCOUNT_NAME=Wallet".concat(walletNumber, "\n            SH_PASSWORD=Oscar1234!\n            MNEMONIC=\n            EXPLORER_URL=https://explorer.rebased.iota.org/?network=testnet\n            WALLET_DB_PATH=./Wallet").concat(walletNumber, "-database\n            NODE_URL=https://api.testnet.iotaledger.net\n");
     fs.writeFileSync(envFilePath, envContent, 'utf-8');
     console.log("\u2705 Archivo ".concat(envFileName, " creado."));
 }
