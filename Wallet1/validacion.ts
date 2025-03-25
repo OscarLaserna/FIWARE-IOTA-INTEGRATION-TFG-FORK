@@ -1,6 +1,5 @@
 import { Wallet, CoinType, TaggedDataPayload, PayloadType } from '@iota/sdk';
-require('dotenv').config();
-
+require('dotenv').config({ path: `./5.env` });
 // Función para convertir una cadena UTF-8 a hexadecimal
 function utf8ToHex(str: string): string {
     return '0x' + Buffer.from(str, 'utf8').toString('hex');
@@ -16,10 +15,10 @@ async function initializeWallet(): Promise<Wallet> {
             clientOptions: {
                 nodes: [process.env.NODE_URL!],
             },
-            coinType: CoinType.Shimmer,
+            coinType: 4219,
             secretManager: {
                 stronghold: {
-                    snapshotPath: './v3.stronghold',
+                    snapshotPath: './wallet5.stronghold',
                     password: process.env.SH_PASSWORD!,
                 },
             },
@@ -34,7 +33,7 @@ async function sendToIotaAndMeasure(payload: string) {
     const account = await wallet.getAccount(process.env.ACCOUNT_NAME!);
     await account.sync();
 
-    const address = 'rms1qpun0fuekhvjvyhesrnehuvuxq6p2rlwapflg073vtx450ntderdjqjr74w';
+    const address = 'tst1qqhpsrff0vsmc3cj83ccvn7fuzt40kkk500xmuqcfa3es0awc2yk5fqdtev';
     const taggedDataPayload: TaggedDataPayload = {
         type: PayloadType.TaggedData,
         tag: utf8ToHex('/ul/iot1234/device001/attrs'),
