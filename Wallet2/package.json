@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/OscarLaserna/FIWARE-IOTA-INTEGRATION-TFG-FORK#readme",
   "dependencies": {
-    "@iota/sdk": "^1.1.5",
+    "@iota/sdk": "^1.1.6",
     "@iota/wallet": "^2.0.3-rc.47",
     "@types/mongodb": "^4.0.7",
     "@types/mqtt": "^2.5.0",
@@ -26,5 +26,8 @@
     "bip39": "^3.1.0",
     "dotenv": "^16.4.5",
     "typescript": "^5.6.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21"
   }
 }

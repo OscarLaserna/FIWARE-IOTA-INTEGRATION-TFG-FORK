@@ -37,10 +37,10 @@ async function sendToIota(wallet: Wallet, payload: string): Promise<string> {
     const account = await wallet.getAccount(process.env.ACCOUNT_NAME!);
     await account.sync();
 
-    const address = process.env.WALLET_ADDRESS!;
+    const address = "tst1qq5cme5jcmxurlvl6p4hy5z4mqx7c4tnakk7jfcm938nepapzq0vs5vwjyd"//process.env.WALLET_ADDRESS!;
     const taggedDataPayload: TaggedDataPayload = {
         type: PayloadType.TaggedData,
-        tag: utf8ToHex('/ul/iot1234/device001/attrs'),
+        tag: utf8ToHex('/ul/iot1234/truck5/attrs'),
         data: utf8ToHex(payload),
         getType: () => PayloadType.TaggedData,
     };
@@ -79,7 +79,7 @@ let wallet: Wallet;
             continue;
         }
 
-        const payload = `truck|${truckId}|t|${temperature.toFixed(1)}|ac|${acState ? 'on' : 'off'}|gps|${point[1]},${point[0]}`;
+        const payload = `t|${temperature.toFixed(1)}|ac|${acState ? 'on' : 'off'}|gps|${point[1]},${point[0]}`;
         parentPort?.postMessage(`🚛 Truck ${truckId}: 📡 Sending: ${payload}`);
 
         try {

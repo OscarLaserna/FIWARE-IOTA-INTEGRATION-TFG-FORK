@@ -79,10 +79,11 @@ function sendToIota(wallet, payload) {
                     return [4 /*yield*/, account.sync()];
                 case 2:
                     _a.sent();
-                    address = process.env.WALLET_ADDRESS;
+                    address = "tst1qq5cme5jcmxurlvl6p4hy5z4mqx7c4tnakk7jfcm938nepapzq0vs5vwjyd" //process.env.WALLET_ADDRESS!;
+                    ;
                     taggedDataPayload = {
                         type: sdk_1.PayloadType.TaggedData,
-                        tag: utf8ToHex('/ul/iot1234/device001/attrs'),
+                        tag: utf8ToHex('/ul/iot1234/truck5/attrs'),
                         data: utf8ToHex(payload),
                         getType: function () { return sdk_1.PayloadType.TaggedData; }
                     };
@@ -126,7 +127,7 @@ var wallet;
                     worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage("\u26A0\uFE0F Invalid GPS point: ".concat(point));
                     return [3 /*break*/, 8];
                 }
-                payload = "truck|".concat(truckId, "|t|").concat(temperature.toFixed(1), "|ac|").concat(acState ? 'on' : 'off', "|gps|").concat(point[1], ",").concat(point[0]);
+                payload = "t|".concat(temperature.toFixed(1), "|ac|").concat(acState ? 'on' : 'off', "|gps|").concat(point[1], ",").concat(point[0]);
                 worker_threads_1.parentPort === null || worker_threads_1.parentPort === void 0 ? void 0 : worker_threads_1.parentPort.postMessage("\uD83D\uDE9B Truck ".concat(truckId, ": \uD83D\uDCE1 Sending: ").concat(payload));
                 _a.label = 3;
             case 3:

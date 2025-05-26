@@ -104,18 +104,16 @@ function initializeWallet() {
                     // Inicializa la billetera con la configuración especificada
                     wallet = new sdk_1.Wallet({
                         storagePath: process.env.WALLET_DB_PATH,
-                        clientOptions: {
-                            nodes: [process.env.NODE_URL]
-                        },
-                        coinType: sdk_1.CoinType.Shimmer,
+                        clientOptions: { nodes: [process.env.NODE_URL] },
+                        coinType: 4219,
                         secretManager: {
                             stronghold: {
-                                snapshotPath: './v3.stronghold',
+                                snapshotPath: "./wallet6.stronghold",
                                 password: process.env.SH_PASSWORD
                             }
                         }
                     });
-                    return [4 /*yield*/, wallet.getAccount('Wallet1')];
+                    return [4 /*yield*/, wallet.getAccount('Wallet6')];
                 case 2:
                     // Obtener la cuenta y sincronizarla
                     account = _b.sent();
@@ -150,7 +148,7 @@ function sendTransaction(destinationAddress, tag, data) {
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 3, , 4]);
-                    amount = BigInt(100000);
+                    amount = BigInt(50600);
                     taggedDataPayload = {
                         type: sdk_1.PayloadType.TaggedData,
                         tag: utf8ToHex(tag),

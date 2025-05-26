@@ -29,7 +29,7 @@ function utf8ToHex(str: string): string {
 const mqttClient = mqtt.connect('mqtt://localhost:1883'); // Conecta a Mosquitto 
 
 // Configuración de MongoDB
-const mongoClient = new MongoClient(process.env.MONGODB_URI); 
+const mongoClient = new MongoClient(process.env.MONGODB_URI!); 
 const dbName = process.env.MONGODB_DB_NAME; 
 
 // Evento que se ejecuta cuando se establece la conexión MQTT
@@ -70,20 +70,18 @@ async function initializeWallet() {
         // Inicializa la billetera con la configuración especificada
         wallet = new Wallet({
             storagePath: process.env.WALLET_DB_PATH,
-            clientOptions: {
-                nodes: [process.env.NODE_URL as string],
-            },
-            coinType: CoinType.Shimmer,
+            clientOptions: { nodes: [process.env.NODE_URL as string] },
+            coinType: 4219,
             secretManager: {
                 stronghold: {
-                    snapshotPath: './v3.stronghold',
+                    snapshotPath: `./wallet6.stronghold`,
                     password: process.env.SH_PASSWORD as string,
                 },
             },
         });
 
         // Obtener la cuenta y sincronizarla
-        account = await wallet.getAccount('Wallet1');
+        account = await wallet.getAccount('Wallet6');
         await account.sync();
         await wallet.setStrongholdPassword(process.env.SH_PASSWORD as string);
     } catch (error) {
@@ -100,7 +98,7 @@ async function sendTransaction(destinationAddress: string, tag: string, data: st
     }
 
     try {
-        const amount = BigInt(100000); // Cantidad a enviar
+        const amount = BigInt(50600); // Cantidad a enviar
         const taggedDataPayload: TaggedDataPayload = {
             type: PayloadType.TaggedData,
             tag: utf8ToHex(tag), // Convertir el tag a hexadecimal
@@ -132,7 +130,7 @@ async function monitorWallet() {
     // Cargar transacciones existentes una sola vez al inicio para evitar mostrarlas como nuevas
     await account.sync({ syncIncomingTransactions: true });
     const initialTransactions = await account.incomingTransactions();
-    initialTransactions.forEach(tx => knownTransactionIds.add(tx.transactionId));
+    initialTransactions.forEach((tx: any) => knownTransactionIds.add(tx.transactionId));
 
     // Loop infinito para monitorear continuamente las transacciones entrantes
     while (true) {
@@ -141,10 +139,10 @@ async function monitorWallet() {
             const incomingTransactions = await account.incomingTransactions(); // Obtener las transacciones entrantes
 
             // Filtrar y mostrar solo las nuevas transacciones
-            const newTransactions = incomingTransactions.filter(tx => !knownTransactionIds.has(tx.transactionId));
+            const newTransactions = incomingTransactions.filter((tx: any) => !knownTransactionIds.has(tx.transactionId));
             if (newTransactions.length > 0) {
                 console.log('Transacciones entrantes nuevas:');
-                newTransactions.forEach(tx => {
+                newTransactions.forEach((tx: any) => {
                     console.log(`ID de transacción: ${tx.transactionId}`);
                     knownTransactionIds.add(tx.transactionId);  // Agregar al conjunto de conocidas
                     
